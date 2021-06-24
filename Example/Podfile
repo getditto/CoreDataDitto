@@ -1,6 +1,6 @@
 use_frameworks!
 
-platform :ios, '9.0'
+platform :ios, '13.0'
 
 target 'CoreDataDitto_Example' do
   pod 'CoreDataDitto', :path => '../'
@@ -8,6 +8,7 @@ target 'CoreDataDitto_Example' do
   target 'CoreDataDitto_Tests' do
     inherit! :search_paths
 
+    pod "Fakery"
     
   end
 end

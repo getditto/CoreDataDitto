@@ -7,16 +7,28 @@
 //
 
 import UIKit
+import DittoSwift
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
+    static var ditto: Ditto!
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+
+        Self.ditto = Ditto()
+        Self.ditto.setAccessLicense(readLicenseToken())
+        Self.ditto.startSync()
+
         return true
+    }
+
+    func readLicenseToken() -> String {
+        let path = Bundle.main.path(forResource: "license_token", ofType: "txt") // file path for file "data.txt"
+        let string = try! String(contentsOfFile: path!, encoding: String.Encoding.utf8)
+        return string
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

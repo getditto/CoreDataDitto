@@ -5,12 +5,16 @@
 [![License](https://img.shields.io/cocoapods/l/CoreDataDitto.svg?style=flat)](https://cocoapods.org/pods/CoreDataDitto)
 [![Platform](https://img.shields.io/cocoapods/p/CoreDataDitto.svg?style=flat)](https://cocoapods.org/pods/CoreDataDitto)
 
+This is an experimental library that watches CoreData changes and reflects them into Ditto. Any Ditto `.update` observable events are insert, updated, or removed from CoreData
 ## Example
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
 
 ## Requirements
 
+1. Clone this repo
+2. Create a `license_token.txt` file in the root of this repo.
+3. Paste in a valid license token.
 ## Installation
 
 CoreDataDitto is available through [CocoaPods](https://cocoapods.org). To install
