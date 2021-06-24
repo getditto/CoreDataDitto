@@ -67,6 +67,7 @@ class InsertionTests: XCTestCase {
             menuItem.name = Faker().commerce.productName()
             menuItem.details = Faker().lorem.sentence()
         }
+
         try! coreDataDitto.startSync()
 
         //let's insert another 5 documents
@@ -77,7 +78,6 @@ class InsertionTests: XCTestCase {
             menuItem.name = Faker().commerce.productName()
             menuItem.details = Faker().lorem.sentence()
         }
-
         wait(for: [ex], timeout: 5)
     }
 }
