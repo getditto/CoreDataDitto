@@ -12,7 +12,7 @@ struct Car {
 /**
  This test case will test ensuring
  */
-class PreferDittoTests: XCTestCase {
+class InsertionTests: XCTestCase {
 
     var ditto: Ditto!
     var coreDataDitto: CoreDataDitto<MenuItem>!
@@ -34,30 +34,9 @@ class PreferDittoTests: XCTestCase {
     
     func testHydratingDittoWithInitialCoreData() {
         // we begin by seeding core data with 20 random objects
-        let managedObjectContext = self.coreDataDitto.fetchedResultsController.managedObjectContext;
-        for _ in 0..<20 {
-            let menuItem = MenuItem(context: managedObjectContext)
-            menuItem.id = UUID().uuidString
-            menuItem.name = Faker().commerce.productName()
-            menuItem.details = Faker().lorem.sentence()
-            managedObjectContext.insert(menuItem)
-        }
-        // begin syncing
-        try! coreDataDitto.sync()
-        // check if ditto has 20 items
-        let docs = ditto.store["menuItems"].findAll().exec()
-        XCTAssertEqual(docs.count, 20)
-    }
-
-    func testHydratingDittoWithCoreData() {
-        let ex = XCTestExpectation(description: "documents have synchronised into Ditto's store")
-
-        self.coreDataDitto.syncOccurredHandler = { [weak ditto] in
-            guard let ditto = ditto else { return }
-
-            // there should eventually be 25 documents (20 from the initial, 5 after)
-            let docs = ditto.store.collection("menuItems").findAll().exec()
-            if docs.count == 25 {
+        let ex = XCTestExpectation(description: "Ditto documents have synced with CoreData")
+        self.coreDataDitto.liveSnapshot = { (snapshot) in
+            if (snapshot.documents.count == 20 && snapshot.managedObjects.count == 20) {
                 ex.fulfill()
             }
         }
@@ -71,10 +50,36 @@ class PreferDittoTests: XCTestCase {
             menuItem.details = Faker().lorem.sentence()
         }
         try! coreDataDitto.sync()
-        XCTAssertEqual(20, self.coreDataDitto.fetchedResultsController.fetchedObjects!.count)
+    }
 
-        // let's insert another 5 documents
-        // this should trigger the fetchResultsControllerDelegate to insert these 5 documents into ditto
+    func testHydratingDittoWithCoreData() {
+        let ex = XCTestExpectation(description: "documents have synchronised into Ditto's store")
+        var callTimes = 0
+        self.coreDataDitto.liveSnapshot = { (snapshot) in
+            callTimes = callTimes + 1
+            if callTimes == 1 {
+                XCTAssert(snapshot.documents.count == 20)
+                XCTAssert(snapshot.managedObjects.count == 20)
+            }
+            if callTimes == 2 {
+                XCTAssert(snapshot.documents.count == 25)
+                XCTAssert(snapshot.managedObjects.count == 25)
+                ex.fulfill()
+            }
+        }
+
+        let managedObjectContext = self.coreDataDitto.fetchedResultsController.managedObjectContext;
+        // we begin by seeding core data with 20 random objects
+        for _ in 0..<20 {
+            let menuItem = MenuItem(context: managedObjectContext)
+            menuItem.id = UUID().uuidString
+            menuItem.name = Faker().commerce.productName()
+            menuItem.details = Faker().lorem.sentence()
+        }
+        try! coreDataDitto.sync()
+
+        //let's insert another 5 documents
+        //this should trigger the fetchResultsControllerDelegate to insert these 5 documents into ditto
         for _ in 0..<5 {
             let menuItem = MenuItem(context: managedObjectContext)
             menuItem.id = UUID().uuidString
@@ -83,10 +88,6 @@ class PreferDittoTests: XCTestCase {
         }
 
         wait(for: [ex], timeout: 5)
-        // there should now be 25 documents (20 from the initial, 5 after)
-        let docs = ditto.store.collection("menuItems").findAll().exec()
-
-        XCTAssertEqual(docs.count, self.coreDataDitto.fetchedResultsController.fetchedObjects!.count)
     }
 }
 

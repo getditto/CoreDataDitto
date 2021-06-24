@@ -17,7 +17,7 @@
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
-		607FACEC1AFB9204008FA782 /* PreferDittoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* PreferDittoTests.swift */; };
+		607FACEC1AFB9204008FA782 /* InsertionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* InsertionTests.swift */; };
 		E5CC5FAA8B6BA4D111591691 /* Pods_CoreDataDitto_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5264A706DF1397FACB37734B /* Pods_CoreDataDitto_Tests.framework */; };
 /* End PBXBuildFile section */
 
@@ -46,7 +46,7 @@
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		607FACE51AFB9204008FA782 /* CoreDataDitto_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoreDataDitto_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		607FACEB1AFB9204008FA782 /* PreferDittoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferDittoTests.swift; sourceTree = "<group>"; };
+		607FACEB1AFB9204008FA782 /* InsertionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertionTests.swift; sourceTree = "<group>"; };
 		61A5C5FB317096424656E50D /* Pods-CoreDataDitto_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CoreDataDitto_Example.debug.xcconfig"; path = "Target Support Files/Pods-CoreDataDitto_Example/Pods-CoreDataDitto_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		9938C0C0FD00E01A2E562C58 /* CoreDataDitto.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = CoreDataDitto.podspec; path = ../CoreDataDitto.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		A5D571B7AFD5F6DFE2FEFA07 /* Pods-CoreDataDitto_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CoreDataDitto_Tests.debug.xcconfig"; path = "Target Support Files/Pods-CoreDataDitto_Tests/Pods-CoreDataDitto_Tests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -123,7 +123,7 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				607FACEB1AFB9204008FA782 /* PreferDittoTests.swift */,
+				607FACEB1AFB9204008FA782 /* InsertionTests.swift */,
 				607FACE91AFB9204008FA782 /* Supporting Files */,
 				2D30063F2683D9DB00635A28 /* TestHelper.swift */,
 				2D3006422683DBCC00635A28 /* Model.xcdatamodeld */,
@@ -380,7 +380,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2D3006402683D9DB00635A28 /* TestHelper.swift in Sources */,
-				607FACEC1AFB9204008FA782 /* PreferDittoTests.swift in Sources */,
+				607FACEC1AFB9204008FA782 /* InsertionTests.swift in Sources */,
 				2D30064A2684281B00635A28 /* Model.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

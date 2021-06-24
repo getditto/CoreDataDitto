@@ -21,19 +21,43 @@ extension NSManagedObject {
     }
 }
 
+protocol CoreDataDittoDelegate: class {
+    func snapshot<T: NSManagedObject>(snapshot: Snapshot<T>)
+}
+
+public struct Snapshot<T: NSManagedObject> {
+    public let managedObjects: [T]
+    public let documents: [DittoDocument]
+}
+
 public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsControllerDelegate {
 
     var liveQuery: DittoLiveQuery?
 
-    let ditto: Ditto
-    let collection: String
-    let pendingCursorOperation: DittoPendingCursorOperation
+    weak var delegate: CoreDataDittoDelegate?
 
-    let fetchRequest: NSFetchRequest<T>
+    public let ditto: Ditto
+    public let collection: String
+    public let pendingCursorOperation: DittoPendingCursorOperation
+
+    public let fetchRequest: NSFetchRequest<T>
     public let fetchedResultsController: NSFetchedResultsController<T>
-    let managedObjectIdKeyPath: String
 
-    public var syncOccurredHandler: () -> Void
+    /**
+     In order for this library to work, it needs to know which field in the CoreData
+     entity is the primary key. Ensure that this key is unique
+     */
+    public let managedObjectIdKeyPath: String
+
+    /// The current snapshot of entities and documents given the DittoPendingCursorOperation and fetch results
+    /// This is a synchronous return of values.
+    public var snapshot: Snapshot<T> {
+        let managedObjects = fetchedResultsController.fetchedObjects ?? []
+        let docs = pendingCursorOperation.exec()
+        return Snapshot(managedObjects: managedObjects, documents: docs)
+    }
+
+    public var liveSnapshot: ((Snapshot<T>) -> Void)?
 
     /// Constructs a bidirectional sync between core data and a ditto live query
     /// - Parameters:
@@ -49,8 +73,7 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
         pendingCursorOperation: DittoPendingCursorOperation,
         fetchRequest: NSFetchRequest<T>,
         context: NSManagedObjectContext,
-        managedObjectIdKeyPath: String,
-        syncOccurredHandler: @escaping () -> Void = {}
+        managedObjectIdKeyPath: String
     ) {
         self.ditto = ditto
         self.collection = collection
@@ -65,7 +88,6 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
         }
         self.managedObjectIdKeyPath = managedObjectIdKeyPath
         self.fetchedResultsController = NSFetchedResultsController(fetchRequest: self.fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
-        self.syncOccurredHandler = syncOccurredHandler
     }
 
     public func sync() throws {
@@ -102,7 +124,12 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
             }
         }
 
-        liveQuery = pendingCursorOperation.observe(eventHandler: { newDocs, event in
+        // do the initial update to the delegate or callback
+        delegate?.snapshot(snapshot: self.snapshot)
+        liveSnapshot?(self.snapshot)
+
+        liveQuery = pendingCursorOperation.observe(eventHandler: { [weak self] newDocs, event in
+            guard let `self` = self else { return }
             switch event {
             case.update(let info):
 
@@ -125,45 +152,47 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
 
                     doc.value.forEach { k, v in
                         if k == "_id" {
+                            // we need to map the document `_id` to the configured `managedObjectIdKeyPath`
                             managedObject.setValue(v, forKey: self.managedObjectIdKeyPath)
                         } else {
+                            // we need to map value to managedObject's key value path
                             managedObject.setValue(v, forKey: k)
                         }
                     }
+                    try? self.fetchedResultsController.managedObjectContext.save()
                 }
                 // ditto wants to delete an object from core data
                 info.deletions.map({ info.oldDocuments[$0] }).forEach { doc in
                     guard let objectToDelete = (self.fetchedResultsController.fetchedObjects ?? []).first(where: { $0.value(forKey: self.managedObjectIdKeyPath) as? NSObject == doc.id.value as? NSObject }) else { return }
                     self.fetchedResultsController.managedObjectContext.delete(objectToDelete)
                 }
-
-                try! self.fetchedResultsController.managedObjectContext.save()
-
-                // For now we just call the sync handler here, but in reality we likely want to call this for
-                // every live query event
-                self.syncOccurredHandler()
             default:
                 // We probably want to handle the `initial` event to, if we want full bi-directional sync
                 return
             }
+            self.delegate?.snapshot(snapshot: self.snapshot)
+            self.liveSnapshot?(self.snapshot)
         })
     }
 
     public func stop() {
         liveQuery?.stop()
+        fetchedResultsController.delegate = nil
     }
 
     deinit {
-        liveQuery?.stop()
+        self.stop()
     }
 
+    /**
+     NSFetchedResultsControllerDelegate implementation
+     */
     public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         guard let managedObject = anObject as? T else { return }
         switch type {
         case .insert:
             let dict = managedObject.asDittoDictionary(managedObjectIdKeyPath: managedObjectIdKeyPath)
-            let id = try! self.ditto.store[collection].insert(dict)
-            print("INSERTED_ID \(id)")
+            try! self.ditto.store[collection].insert(dict)
         case .delete:
             guard let id = managedObject.value(forKey: managedObjectIdKeyPath) else { return }
             self.ditto.store[collection].findByID(id).remove()
@@ -172,18 +201,20 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
             self.ditto.store[collection].findByID(id).update { doc in
                 guard let doc = doc else { return }
                 let dict = managedObject.valuesWithoutId(managedObjectIdKeyPath: self.managedObjectIdKeyPath)
-                doc.value.keys.filter({ !dict.keys.contains($0) }).forEach { key in
-                    doc[key].remove()
-                }
                 dict.forEach { (k, v) in
-                    doc[k].set(v)
+                    if !doc.value.keys.contains(k) && k != "_id" {
+                        doc[k].remove()
+                    } else {
+                        if doc.value[k] as? NSObject != v as? NSObject {
+                            doc[k].set(v)
+                        }
+                    }
                 }
             }
         default:
-            return
+            break
         }
-        // Currently we always call this handler, even if there was a `move`, which we probably also want to
-        // handle anyway
-        self.syncOccurredHandler()
+        self.delegate?.snapshot(snapshot: self.snapshot)
+        self.liveSnapshot?(self.snapshot)
     }
 }
