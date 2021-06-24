@@ -33,6 +33,7 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
     public let fetchedResultsController: NSFetchedResultsController<T>
     let managedObjectIdKeyPath: String
 
+    public var syncOccurredHandler: () -> Void
 
     /// Constructs a bidirectional sync between core data and a ditto live query
     /// - Parameters:
@@ -48,7 +49,8 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
         pendingCursorOperation: DittoPendingCursorOperation,
         fetchRequest: NSFetchRequest<T>,
         context: NSManagedObjectContext,
-        managedObjectIdKeyPath: String
+        managedObjectIdKeyPath: String,
+        syncOccurredHandler: @escaping () -> Void = {}
     ) {
         self.ditto = ditto
         self.collection = collection
@@ -63,6 +65,7 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
         }
         self.managedObjectIdKeyPath = managedObjectIdKeyPath
         self.fetchedResultsController = NSFetchedResultsController(fetchRequest: self.fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
+        self.syncOccurredHandler = syncOccurredHandler
     }
 
     public func sync() throws {
@@ -133,10 +136,16 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
                     guard let objectToDelete = (self.fetchedResultsController.fetchedObjects ?? []).first(where: { $0.value(forKey: self.managedObjectIdKeyPath) as? NSObject == doc.id.value as? NSObject }) else { return }
                     self.fetchedResultsController.managedObjectContext.delete(objectToDelete)
                 }
+
+                try! self.fetchedResultsController.managedObjectContext.save()
+
+                // For now we just call the sync handler here, but in reality we likely want to call this for
+                // every live query event
+                self.syncOccurredHandler()
             default:
+                // We probably want to handle the `initial` event to, if we want full bi-directional sync
                 return
             }
-            try! self.fetchedResultsController.managedObjectContext.save()
         })
     }
 
@@ -173,5 +182,8 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
         default:
             return
         }
+        // Currently we always call this handler, even if there was a `move`, which we probably also want to
+        // handle anyway
+        self.syncOccurredHandler()
     }
 }

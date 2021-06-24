@@ -50,6 +50,18 @@ class PreferDittoTests: XCTestCase {
     }
 
     func testHydratingDittoWithCoreData() {
+        let ex = XCTestExpectation(description: "documents have synchronised into Ditto's store")
+
+        self.coreDataDitto.syncOccurredHandler = { [weak ditto] in
+            guard let ditto = ditto else { return }
+
+            // there should eventually be 25 documents (20 from the initial, 5 after)
+            let docs = ditto.store.collection("menuItems").findAll().exec()
+            if docs.count == 25 {
+                ex.fulfill()
+            }
+        }
+
         let managedObjectContext = self.coreDataDitto.fetchedResultsController.managedObjectContext;
         // we begin by seeding core data with 20 random objects
         for _ in 0..<20 {
@@ -69,9 +81,8 @@ class PreferDittoTests: XCTestCase {
             menuItem.details = Faker().lorem.sentence()
             managedObjectContext.insert(menuItem)
         }
-        // there should now be 25 documents (20 from the initial, 5 after)
-        let docs = ditto.store.collection("menuItems").findAll().exec()
-        XCTAssertEqual(docs.count, 25)
+
+        wait(for: [ex], timeout: 5)
     }
 }
 
