@@ -33,7 +33,7 @@ class PreferDittoTests: XCTestCase {
     }
     
     func testHydratingDittoWithInitialCoreData() {
-        // This is an example of a functional test case.
+        // we begin by seeding core data with 20 random objects
         let managedObjectContext = self.coreDataDitto.fetchedResultsController.managedObjectContext;
         for _ in 0..<20 {
             let menuItem = MenuItem(context: managedObjectContext)
@@ -42,13 +42,16 @@ class PreferDittoTests: XCTestCase {
             menuItem.details = Faker().lorem.sentence()
             managedObjectContext.insert(menuItem)
         }
-        try! coreDataDitto.start()
+        // begin syncing
+        try! coreDataDitto.sync()
+        // check if ditto has 20 items
         let docs = ditto.store["menuItems"].findAll().exec()
         XCTAssertEqual(docs.count, 20)
     }
 
     func testHydratingDittoWithCoreData() {
         let managedObjectContext = self.coreDataDitto.fetchedResultsController.managedObjectContext;
+        // we begin by seeding core data with 20 random objects
         for _ in 0..<20 {
             let menuItem = MenuItem(context: managedObjectContext)
             menuItem.id = UUID().uuidString
@@ -56,9 +59,9 @@ class PreferDittoTests: XCTestCase {
             menuItem.details = Faker().lorem.sentence()
             managedObjectContext.insert(menuItem)
         }
-        try! coreDataDitto.start()
+        try! coreDataDitto.sync()
         // let's insert another 5 documents
-        // this should trigger the fetchResultsControllerDelegate
+        // this should trigger the fetchResultsControllerDelegate to insert these 5 documents into ditto
         for _ in 0..<5 {
             let menuItem = MenuItem(context: managedObjectContext)
             menuItem.id = UUID().uuidString
@@ -66,6 +69,7 @@ class PreferDittoTests: XCTestCase {
             menuItem.details = Faker().lorem.sentence()
             managedObjectContext.insert(menuItem)
         }
+        // there should now be 25 documents (20 from the initial, 5 after)
         let docs = ditto.store.collection("menuItems").findAll().exec()
         XCTAssertEqual(docs.count, 25)
     }

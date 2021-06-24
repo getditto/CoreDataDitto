@@ -33,6 +33,15 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
     public let fetchedResultsController: NSFetchedResultsController<T>
     let managedObjectIdKeyPath: String
 
+
+    /// Constructs a bidirectional sync between core data and a ditto live query
+    /// - Parameters:
+    ///   - ditto: the ditto instance
+    ///   - collection: the name of the collection to sync with core data
+    ///   - pendingCursorOperation: the pending cursor operation to sync with core data
+    ///   - fetchRequest: the fetch request from core data. This needs to match up logically with the pendingCursorOperation or else the syncing will not produce proper results
+    ///   - context: the managed object context
+    ///   - managedObjectIdKeyPath: the name of the property or key of the core data entity that represents the primary unique key
     public init(
         ditto: Ditto,
         collection: String,
@@ -47,6 +56,8 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
         self.fetchRequest = fetchRequest
 
         if self.fetchRequest.sortDescriptors == nil {
+            // in order for NSFetchedResultsController to work it _needs_ a sort descriptor
+            // the user can specify one but if the user omits it, we will sort by the managedObjectIdKey
             let sort = NSSortDescriptor(key: managedObjectIdKeyPath, ascending: false)
             self.fetchRequest.sortDescriptors = [sort]
         }
@@ -54,11 +65,7 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
         self.fetchedResultsController = NSFetchedResultsController(fetchRequest: self.fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
     }
 
-    public func start() throws {
-        try matchCoreDataToDitto()
-    }
-
-    private func matchCoreDataToDitto() throws {
+    public func sync() throws {
         self.fetchedResultsController.delegate = self
 
         let initialDocs = pendingCursorOperation.exec()
@@ -141,13 +148,13 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
         liveQuery?.stop()
     }
 
-
     public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         guard let managedObject = anObject as? T else { return }
         switch type {
         case .insert:
             let dict = managedObject.asDittoDictionary(managedObjectIdKeyPath: managedObjectIdKeyPath)
-            try! self.ditto.store[collection].insert(dict)
+            let id = try! self.ditto.store[collection].insert(dict)
+            print("INSERTED_ID \(id)")
         case .delete:
             guard let id = managedObject.value(forKey: managedObjectIdKeyPath) else { return }
             self.ditto.store[collection].findByID(id).remove()
