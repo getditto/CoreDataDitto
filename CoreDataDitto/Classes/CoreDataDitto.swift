@@ -203,33 +203,17 @@ public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResults
             guard let `self` = self else { return }
             switch event {
             case.update(let info):
-
                 info.insertions.map({ newDocs[$0] }).forEach { doc in
                     let managedObject = T(context: self.fetchedResultsController.managedObjectContext)
-                    doc.value.forEach { k, v in
-                        if k == "_id" {
-                            managedObject.setValue(v, forKey: self.managedObjectIdKeyPath)
-                        } else {
-                            managedObject.setValue(v, forKey: k)
-                        }
-                    }
+                    managedObject.setWithDittoDocument(dittoDocument: doc, managedObjectIdKeyPath: self.managedObjectIdKeyPath)
                     self.fetchedResultsController.managedObjectContext.insert(managedObject)
                 }
-
                 info.updates.map({ newDocs[$0] }).forEach { doc in
-                    guard let managedObject = self.fetchedResultsController.fetchedObjects?.first(where: { managedObject in
+                    let managedObject = self.fetchedResultsController.fetchedObjects?.first(where: { managedObject in
                         managedObject.value(forKey: self.managedObjectIdKeyPath) as? NSObject == doc.id.value as? NSObject
-                    }) else { return }
-
-                    doc.value.forEach { k, v in
-                        if k == "_id" {
-                            // we need to map the document `_id` to the configured `managedObjectIdKeyPath`
-                            managedObject.setValue(v, forKey: self.managedObjectIdKeyPath)
-                        } else {
-                            // we need to map value to managedObject's key value path
-                            managedObject.setValue(v, forKey: k)
-                        }
-                    }
+                    }) ?? T(context: self.fetchedResultsController.managedObjectContext)
+                    // we've found a managedObject with the same ids
+                    managedObject.setWithDittoDocument(dittoDocument: doc, managedObjectIdKeyPath: self.managedObjectIdKeyPath)
                     try? self.fetchedResultsController.managedObjectContext.save()
                 }
                 // ditto wants to delete an object from core data
@@ -239,10 +223,11 @@ public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResults
                 }
             default:
                 // We probably want to handle the `initial` event to, if we want full bi-directional sync
-                return
+                break
             }
-            self.delegate?.snapshot(snapshot: self.snapshot)
-            self.liveSnapshot?(self.snapshot)
+            let snapshot = Snapshot(managedObjects: self.fetchedResultsController.fetchedObjects ?? [], documents: newDocs)
+            self.delegate?.snapshot(snapshot: snapshot)
+            self.liveSnapshot?(snapshot)
         })
     }
 
@@ -289,7 +274,9 @@ public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResults
             // there is a `.move` case but we don't really care about it.
             break
         }
-        self.delegate?.snapshot(snapshot: self.snapshot)
-        self.liveSnapshot?(self.snapshot)
+        let docs = pendingCursorOperation.exec()
+        let snapshot = Snapshot(managedObjects: self.fetchedResultsController.fetchedObjects ?? [], documents: docs)
+        self.delegate?.snapshot(snapshot: snapshot)
+        self.liveSnapshot?(snapshot)
     }
 }

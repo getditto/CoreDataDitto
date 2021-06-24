@@ -54,7 +54,7 @@ class InsertionTests: XCTestCase {
                 XCTAssert(snapshot.documents.count == 20)
                 XCTAssert(snapshot.managedObjects.count == 20)
             }
-            if callTimes == 2 {
+            if callTimes == 6 {
                 XCTAssert(snapshot.documents.count == 25)
                 XCTAssert(snapshot.managedObjects.count == 25)
                 ex.fulfill()
