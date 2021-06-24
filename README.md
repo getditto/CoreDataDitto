@@ -9,6 +9,7 @@ This is an experimental library that watches CoreData changes and reflects them 
 ## Example
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
+(Currently the example is useless, please see the XCTest cases instead!)
 
 ## Requirements
 
