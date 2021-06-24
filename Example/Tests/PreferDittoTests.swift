@@ -69,30 +69,5 @@ class PreferDittoTests: XCTestCase {
         let docs = ditto.store.collection("menuItems").findAll().exec()
         XCTAssertEqual(docs.count, 25)
     }
-
-    func testDictionaryEquality() {
-        try! ditto.store["cars"].insert([
-            "_id": "ford",
-            "name": "Ford",
-            "price": 120
-        ])
-        try! ditto.store["cars"].insert([
-            "_id": "honda",
-            "name": "Honda",
-            "price": 150
-        ])
-
-        let fordA = ditto.store["cars"].findByID("ford").exec()!
-        let fordB = ditto.store["cars"].findByID("ford").exec()!
-        let hondaA = ditto.store["cars"].findByID("honda").exec()!
-        let hondaB = ditto.store["cars"].findByID("honda").exec()!
-
-        XCTAssert(fordA == fordB)
-        XCTAssert(fordA != hondaA)
-        XCTAssert(fordA != hondaB)
-        XCTAssert(hondaA == hondaB)
-        XCTAssert(fordB != hondaA)
-        XCTAssert(fordB != hondaB)
-    }
 }
 

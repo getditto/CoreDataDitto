@@ -1,12 +1,6 @@
 import DittoSwift
 import CoreData
 
-extension DittoDocument: Equatable {
-    public static func == (lhs: DittoDocument, rhs: DittoDocument) -> Bool {
-        return NSDictionary(dictionary: lhs.value as [AnyHashable : Any]).isEqual(to: rhs.value as [AnyHashable : Any])
-    }
-}
-
 extension NSManagedObject {
 
     func asDittoDictionary(managedObjectIdKeyPath: String) -> [String: Any] {
@@ -24,11 +18,6 @@ extension NSManagedObject {
         dict.removeValue(forKey: managedObjectIdKeyPath)
         dict.removeValue(forKey: "_id")
         return dict
-    }
-
-    func isEqual(to dittoDocument: DittoDocument, managedObjectIdKeyPath: String) -> Bool {
-        return NSDictionary(dictionary: dittoDocument.value as [AnyHashable : Any])
-            .isEqual(to: self.asDittoDictionary(managedObjectIdKeyPath: managedObjectIdKeyPath))
     }
 }
 
