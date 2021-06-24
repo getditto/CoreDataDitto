@@ -69,9 +69,10 @@ class PreferDittoTests: XCTestCase {
             menuItem.id = UUID().uuidString
             menuItem.name = Faker().commerce.productName()
             menuItem.details = Faker().lorem.sentence()
-            managedObjectContext.insert(menuItem)
         }
         try! coreDataDitto.sync()
+        XCTAssertEqual(20, self.coreDataDitto.fetchedResultsController.fetchedObjects!.count)
+
         // let's insert another 5 documents
         // this should trigger the fetchResultsControllerDelegate to insert these 5 documents into ditto
         for _ in 0..<5 {
@@ -79,10 +80,13 @@ class PreferDittoTests: XCTestCase {
             menuItem.id = UUID().uuidString
             menuItem.name = Faker().commerce.productName()
             menuItem.details = Faker().lorem.sentence()
-            managedObjectContext.insert(menuItem)
         }
 
         wait(for: [ex], timeout: 5)
+        // there should now be 25 documents (20 from the initial, 5 after)
+        let docs = ditto.store.collection("menuItems").findAll().exec()
+
+        XCTAssertEqual(docs.count, self.coreDataDitto.fetchedResultsController.fetchedObjects!.count)
     }
 }
 
