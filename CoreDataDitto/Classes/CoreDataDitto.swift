@@ -3,15 +3,24 @@ import CoreData
 
 extension NSManagedObject {
 
+
+    /// This function will take the core data object and turn it into an acceptable DittoDocument [String: Any]
+    /// It will take the `managedObjectIdKeyPath` and map it to `_id`
+    /// - Parameter managedObjectIdKeyPath: the primary key in the core data object
+    /// - Returns: A dictionary acceptable for `ditto.store[collectionName].insert`
     func asDittoDictionary(managedObjectIdKeyPath: String) -> [String: Any] {
         let keys = Array(self.entity.attributesByName.keys)
         var dict = self.dictionaryWithValues(forKeys: keys)
         dict["_id"] = dict[managedObjectIdKeyPath]
         dict.removeValue(forKey: managedObjectIdKeyPath)
-
         return dict
     }
 
+
+    /// This function will take the core data object and turn it into an acceptable DittoDocument [String: Any]
+    /// however this will omit the specified `_id` or `managedObjectKeyPath` field
+    /// - Parameter managedObjectIdKeyPath: the primary key in the core data object
+    /// - Returns: A dictionary acceptable for `ditto.store[collectionName].insert` without the `_id` field
     func valuesWithoutId(managedObjectIdKeyPath: String) -> [String: Any] {
         let keys = Array(self.entity.attributesByName.keys)
         var dict = self.dictionaryWithValues(forKeys: keys)
@@ -19,8 +28,58 @@ extension NSManagedObject {
         dict.removeValue(forKey: "_id")
         return dict
     }
+
+
+    /// Checks if a DittoDocument has the same value as the representation of the CoreData object
+    /// - Parameters:
+    ///   - dittoDocument: the ditto document to compare
+    ///   - managedObjectIdKeyPath: the primary key field for this core data object used to compare the `_id`
+    /// - Returns: Is of equal value
+    public func isEqual(to dittoDocument: DittoDocument, managedObjectIdKeyPath: String) -> Bool {
+        return dittoDocument.isEqual(to: self, managedObjectIdKeyPath: managedObjectIdKeyPath)
+    }
+
+
+    /// Takes a ditto document, iterates over its keys and value
+    /// - Parameters:
+    ///   - dittoDocument: The DittoDocument
+    ///   - managedObjectIdKeyPath: the primary key field for this core data object used to set the `_id`
+    func setWithDittoDocument(dittoDocument: DittoDocument, managedObjectIdKeyPath: String) {
+        dittoDocument.value.forEach { k, v in
+            if k == "_id" {
+                self.setValue(v, forKey: managedObjectIdKeyPath)
+            } else {
+                self.setValue(v, forKey: k)
+            }
+        }
+    }
 }
 
+extension DittoDocument {
+
+    public func isEqual(to managedObject: NSManagedObject, managedObjectIdKeyPath: String) -> Bool {
+        let managedObjectAsDict = managedObject.asDittoDictionary(managedObjectIdKeyPath: managedObjectIdKeyPath)
+        return NSDictionary(dictionary: self.value as [AnyHashable : Any]).isEqual(NSDictionary(dictionary: managedObjectAsDict))
+    }
+
+}
+
+extension DittoMutableDocument {
+
+    /// Takes a managed object from Core Data, and applies all the values
+    /// - Parameters:
+    ///   - managedObject: The core data managed object
+    ///   - managedObjectIdKeyPath: the primary key field for this core data object used to set the `_id`
+    func setWithManagedObject(managedObject: NSManagedObject, managedObjectIdKeyPath: String) {
+        let dict = managedObject.valuesWithoutId(managedObjectIdKeyPath: managedObjectIdKeyPath)
+        dict.forEach { (key, value) in
+            self[key].set(value)
+        }
+    }
+}
+
+
+/// An alternative delegate that will notify snapshot changes
 protocol CoreDataDittoDelegate: class {
     func snapshot<T: NSManagedObject>(snapshot: Snapshot<T>)
 }
@@ -30,14 +89,18 @@ public struct Snapshot<T: NSManagedObject> {
     public let documents: [DittoDocument]
 }
 
-public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsControllerDelegate {
+public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsControllerDelegate {
 
     var liveQuery: DittoLiveQuery?
 
     weak var delegate: CoreDataDittoDelegate?
 
     public let ditto: Ditto
+
+    /// The name of the collection
     public let collection: String
+
+    /// The Ditto query that should match the `fetchRequest`
     public let pendingCursorOperation: DittoPendingCursorOperation
 
     public let fetchRequest: NSFetchRequest<T>
@@ -98,28 +161,36 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
         let fetchedObjects = fetchedResultsController.fetchedObjects ?? []
 
         ditto.store.write { txn in
+            /**
+             Loop through all the intial Ditto documents
+             Find the ones that don't exist in core data
+             Remove them from Ditto (we are preferring what is in core data first!)
+             */
             initialDocs
                 .filter({ !fetchedObjects.compactMap({ $0.value(forKey: self.managedObjectIdKeyPath) as? NSObject }).contains($0.id.value as! NSObject) }).forEach { dittoDocument in
                     txn[self.collection].findByID(dittoDocument.id).remove()
                 }
 
+            /**
+             Loop through all the fetched object, find if they do not exist with the same id in Ditto
+             and proceed to insert them into Ditto
+             */
             fetchedObjects
                 .filter({ !initialDocs.compactMap({ $0.id.value as? NSObject }).contains($0.value(forKey: self.managedObjectIdKeyPath) as! NSObject) }).forEach { managedObject in
-                    try! txn[self.collection].insert(managedObject.asDittoDictionary(managedObjectIdKeyPath: self.managedObjectIdKeyPath))
+
+                    let dictionary = managedObject.asDittoDictionary(managedObjectIdKeyPath: self.managedObjectIdKeyPath)
+                    try! txn[self.collection].insert(dictionary)
                 }
 
+            /**
+             Find all the matching ids and update the ditto documents to match the CoreData object
+             */
             fetchedObjects.forEach { managedObject in
                 guard let doc = initialDocs.first(where: { $0.id.value as? NSObject == managedObject.value(forKey: self.managedObjectIdKeyPath) as? NSObject }) else { return }
 
                 txn[self.collection].findByID(doc.id).update { doc in
                     guard let doc = doc else { return }
-                    let dict = managedObject.valuesWithoutId(managedObjectIdKeyPath: self.managedObjectIdKeyPath)
-                    doc.value.keys.filter({ !dict.keys.contains($0) }).forEach { key in
-                        doc[key].remove()
-                    }
-                    dict.forEach { key, val in
-                        doc[key].set(val)
-                    }
+                    doc.setWithManagedObject(managedObject: managedObject, managedObjectIdKeyPath: self.managedObjectIdKeyPath)
                 }
             }
         }
@@ -180,6 +251,9 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
         fetchedResultsController.delegate = nil
     }
 
+    /**
+     If this object is deallocated
+     */
     deinit {
         self.stop()
     }
@@ -191,27 +265,28 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
         guard let managedObject = anObject as? T else { return }
         switch type {
         case .insert:
+            /**
+             The user has inserted a new CoreData object, we need to turn that into a new insertion into Ditto
+             */
             let dict = managedObject.asDittoDictionary(managedObjectIdKeyPath: managedObjectIdKeyPath)
             try! self.ditto.store[collection].insert(dict)
         case .delete:
+            /**
+             The user has deleted a CoreData object, find the ditto document by Id and delete it
+             */
             guard let id = managedObject.value(forKey: managedObjectIdKeyPath) else { return }
             self.ditto.store[collection].findByID(id).remove()
         case .update:
+            /**
+             The user has updated a CoreData object, find the ditto document set it's values to match
+             */
             guard let id = managedObject.value(forKey: managedObjectIdKeyPath) else { return }
             self.ditto.store[collection].findByID(id).update { doc in
                 guard let doc = doc else { return }
-                let dict = managedObject.valuesWithoutId(managedObjectIdKeyPath: self.managedObjectIdKeyPath)
-                dict.forEach { (k, v) in
-                    if !doc.value.keys.contains(k) && k != "_id" {
-                        doc[k].remove()
-                    } else {
-                        if doc.value[k] as? NSObject != v as? NSObject {
-                            doc[k].set(v)
-                        }
-                    }
-                }
+                doc.setWithManagedObject(managedObject: managedObject, managedObjectIdKeyPath: self.managedObjectIdKeyPath)
             }
         default:
+            // there is a `.move` case but we don't really care about it.
             break
         }
         self.delegate?.snapshot(snapshot: self.snapshot)

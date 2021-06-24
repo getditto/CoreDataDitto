@@ -5,13 +5,6 @@ import CoreDataDitto
 import Fakery
 
 
-struct Car {
-    var name: String
-    var mileage: Float
-}
-/**
- This test case will test ensuring
- */
 class InsertionTests: XCTestCase {
 
     var ditto: Ditto!
