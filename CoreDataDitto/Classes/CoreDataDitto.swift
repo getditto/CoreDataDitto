@@ -135,7 +135,6 @@ public class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResultsContro
                 // ditto wants to delete an object from core data
                 info.deletions.map({ info.oldDocuments[$0] }).forEach { doc in
                     guard let objectToDelete = (self.fetchedResultsController.fetchedObjects ?? []).first(where: { $0.value(forKey: self.managedObjectIdKeyPath) as? NSObject == doc.id.value as? NSObject }) else { return }
-
                     self.fetchedResultsController.managedObjectContext.delete(objectToDelete)
                 }
             default:

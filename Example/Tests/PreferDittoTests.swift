@@ -57,6 +57,8 @@ class PreferDittoTests: XCTestCase {
             managedObjectContext.insert(menuItem)
         }
         try! coreDataDitto.start()
+        // let's insert another 5 documents
+        // this should trigger the fetchResultsControllerDelegate
         for _ in 0..<5 {
             let menuItem = MenuItem(context: managedObjectContext)
             menuItem.id = UUID().uuidString
@@ -64,7 +66,7 @@ class PreferDittoTests: XCTestCase {
             menuItem.details = Faker().lorem.sentence()
             managedObjectContext.insert(menuItem)
         }
-        let docs = pendingCursor.exec()
+        let docs = ditto.store.collection("menuItems").findAll().exec()
         XCTAssertEqual(docs.count, 25)
     }
 
