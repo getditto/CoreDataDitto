@@ -153,7 +153,7 @@ public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResults
         self.fetchedResultsController = NSFetchedResultsController(fetchRequest: self.fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
     }
 
-    public func sync() throws {
+    public func startSync() throws {
         self.fetchedResultsController.delegate = self
 
         let initialDocs = pendingCursorOperation.exec()
@@ -202,7 +202,7 @@ public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResults
         liveQuery = pendingCursorOperation.observe(eventHandler: { [weak self] newDocs, event in
             guard let `self` = self else { return }
             switch event {
-            case.update(let info):
+            case .update(let info):
                 info.insertions.map({ newDocs[$0] }).forEach { doc in
                     let managedObject = T(context: self.fetchedResultsController.managedObjectContext)
                     managedObject.setWithDittoDocument(dittoDocument: doc, managedObjectIdKeyPath: self.managedObjectIdKeyPath)

@@ -42,7 +42,7 @@ class InsertionTests: XCTestCase {
             menuItem.name = Faker().commerce.productName()
             menuItem.details = Faker().lorem.sentence()
         }
-        try! coreDataDitto.sync()
+        try! coreDataDitto.startSync()
     }
 
     func testHydratingDittoWithCoreData() {
@@ -54,9 +54,7 @@ class InsertionTests: XCTestCase {
                 XCTAssert(snapshot.documents.count == 20)
                 XCTAssert(snapshot.managedObjects.count == 20)
             }
-            if callTimes == 6 {
-                XCTAssert(snapshot.documents.count == 25)
-                XCTAssert(snapshot.managedObjects.count == 25)
+            if callTimes > 1 && snapshot.documents.count == 25 && snapshot.managedObjects.count == 25 {
                 ex.fulfill()
             }
         }
@@ -69,7 +67,7 @@ class InsertionTests: XCTestCase {
             menuItem.name = Faker().commerce.productName()
             menuItem.details = Faker().lorem.sentence()
         }
-        try! coreDataDitto.sync()
+        try! coreDataDitto.startSync()
 
         //let's insert another 5 documents
         //this should trigger the fetchResultsControllerDelegate to insert these 5 documents into ditto
