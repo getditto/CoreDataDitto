@@ -55,5 +55,22 @@ class ExtensionMethodTests: XCTestCase {
 
     }
 
-}
+    func testDictionaryEquality() {
+        let dictA: [String: Any?] = [
+            "name": "Tom"
+        ]
+        let dictB: [String: Any?] = [
+            "name": "Tom"
+        ]
+        XCTAssert(dictA == dictB)
 
+        let dictC: [String: Any] = [
+            "name": "Tom"
+        ]
+        let dictD: [String: Any] = [
+            "name": "Max"
+        ]
+        XCTAssert(dictC != dictD)
+    }
+
+}

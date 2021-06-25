@@ -1,9 +1,15 @@
 import DittoSwift
 import CoreData
 
+public func ==<K, L: Any, R: Any>(lhs: [K: L], rhs: [K: R] ) -> Bool {
+   (lhs as NSDictionary).isEqual(to: rhs)
+}
+
+public func !=<K, L: Any, R: Any>(lhs: [K: L], rhs: [K: R] ) -> Bool {
+   return !(lhs as NSDictionary).isEqual(to: rhs)
+}
+
 extension NSManagedObject {
-
-
     /// This function will take the core data object and turn it into an acceptable DittoDocument [String: Any]
     /// It will take the `managedObjectIdKeyPath` and map it to `_id`
     /// - Parameter managedObjectIdKeyPath: the primary key in the core data object
