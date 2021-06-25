@@ -105,12 +105,14 @@ class InsertionTests: XCTestCase {
         let ex = XCTestExpectation(description: "Ditto documents have synced with CoreData locally")
         let ex2 = XCTestExpectation(description: "Ditto documents have synced with CoreData on second instance")
         self.coreDataDitto.liveSnapshot = { (snapshot) in
+            print("Ditto1: documents count \(snapshot.documents.count) managed objects count \(snapshot.managedObjects.count)")
             if (snapshot.documents.count == 20 && snapshot.managedObjects.count == 20) {
                 ex.fulfill()
             }
         }
         
         self.coreDataDitto2.liveSnapshot = { (snapshot) in
+            print("Ditto2: documents count \(snapshot.documents.count) managed objects count \(snapshot.managedObjects.count)")
             if (snapshot.documents.count == 20 && snapshot.managedObjects.count == 20) {
                 ex2.fulfill()
             }
@@ -118,7 +120,7 @@ class InsertionTests: XCTestCase {
 
         let managedObjectContext = self.coreDataDitto.fetchedResultsController.managedObjectContext;
         // we begin by seeding core data with 20 random objects
-        for _ in 0..<20 {
+        for _ in 0..<1 {
             let menuItem = MenuItem(context: managedObjectContext)
             menuItem.id = UUID().uuidString
             menuItem.name = Faker().commerce.productName()
@@ -128,4 +130,3 @@ class InsertionTests: XCTestCase {
         wait(for: [ex, ex2], timeout: 15)
     }
 }
-
