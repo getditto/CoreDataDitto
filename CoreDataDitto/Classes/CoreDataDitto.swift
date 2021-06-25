@@ -47,15 +47,11 @@ extension NSManagedObject {
     func setWithDittoDocument(dittoDocument: DittoDocument, managedObjectIdKeyPath: String) {
         dittoDocument.value.forEach { k, v in
             if k == "_id" {
-                guard let initial = self.value(forKey: managedObjectIdKeyPath) as? NSObject else { return }
-                guard let newValue = v as? NSObject else { return }
-                if !initial.isEqual(newValue) {
+                if !objectEquals(a: self.value(forKey: managedObjectIdKeyPath), b: v) {
                     self.setValue(v, forKey: managedObjectIdKeyPath)
                 }
             } else {
-                guard let initial = self.value(forKey: k) as? NSObject else { return }
-                guard let newValue = v as? NSObject else { return }
-                if !initial.isEqual(newValue) {
+                if !objectEquals(a: self.value(forKey: k), b: v) {
                     self.setValue(v, forKey: k)
                 }
             }
@@ -288,4 +284,17 @@ public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResults
         self.delegate?.snapshot(snapshot: snapshot)
         self.liveSnapshot?(snapshot)
     }
+}
+
+
+func objectEquals(a: Any?, b: Any?) -> Bool {
+    let objA = a as? NSObject
+    let objB = b as? NSObject
+    if objA == nil && objB == nil {
+        return true
+    }
+    if let objA = objA, let objB = objB {
+        return objA.isEqual(objB)
+    }
+    return false
 }
