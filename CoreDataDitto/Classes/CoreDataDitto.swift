@@ -47,9 +47,17 @@ extension NSManagedObject {
     func setWithDittoDocument(dittoDocument: DittoDocument, managedObjectIdKeyPath: String) {
         dittoDocument.value.forEach { k, v in
             if k == "_id" {
-                self.setValue(v, forKey: managedObjectIdKeyPath)
+                guard let initial = self.value(forKey: managedObjectIdKeyPath) as? NSObject else { return }
+                guard let newValue = v as? NSObject else { return }
+                if !initial.isEqual(newValue) {
+                    self.setValue(v, forKey: managedObjectIdKeyPath)
+                }
             } else {
-                self.setValue(v, forKey: k)
+                guard let initial = self.value(forKey: k) as? NSObject else { return }
+                guard let newValue = v as? NSObject else { return }
+                if !initial.isEqual(newValue) {
+                    self.setValue(v, forKey: k)
+                }
             }
         }
     }
