@@ -23,8 +23,9 @@ class InsertionTests: XCTestCase {
         ditto2 = TestHelper.ditto2(appName: appName)
         pendingCursor = ditto.store["menuItems"].findAll()
         pendingCursor2 = ditto2.store["menuItems"].findAll()
-        coreDataDitto = CoreDataDitto(ditto: ditto, collection: "menuItems", pendingCursorOperation: pendingCursor, fetchRequest: MenuItem.fetchRequest(), context: TestHelper.persistentContainer().viewContext, managedObjectIdKeyPath: "id")
-        coreDataDitto2 = CoreDataDitto(ditto: ditto2, collection: "menuItems", pendingCursorOperation: pendingCursor, fetchRequest: MenuItem.fetchRequest(), context: TestHelper.persistentContainer().viewContext, managedObjectIdKeyPath: "id")
+        let mom = TestHelper.createMom()
+        coreDataDitto = CoreDataDitto(ditto: ditto, collection: "menuItems", pendingCursorOperation: pendingCursor, fetchRequest: MenuItem.fetchRequest(), context: TestHelper.persistentContainer(mom: mom).viewContext, managedObjectIdKeyPath: "id")
+        coreDataDitto2 = CoreDataDitto(ditto: ditto2, collection: "menuItems", pendingCursorOperation: pendingCursor, fetchRequest: MenuItem.fetchRequest(), context: TestHelper.persistentContainer(mom: mom).viewContext, managedObjectIdKeyPath: "id")
         
         ditto.startSync()
         ditto2.startSync()

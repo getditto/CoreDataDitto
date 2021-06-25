@@ -22,7 +22,7 @@ class ExtensionMethodTests: XCTestCase {
             let sort = NSSortDescriptor(key: "id", ascending: false)
             fetchRequest.sortDescriptors = [sort]
         }
-        let context = TestHelper.persistentContainer().viewContext
+        let context = TestHelper.persistentContainer(mom: TestHelper.createMom()).viewContext
         fetchResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
     }
     

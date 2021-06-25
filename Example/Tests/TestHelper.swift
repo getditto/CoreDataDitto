@@ -10,10 +10,7 @@ import DittoSwift
 import CoreData
 
 class CoreDataContainer: NSPersistentContainer {
-    init(name: String, bundles: [Bundle] = Bundle.allBundles, inMemory: Bool = false) {
-        guard let mom = NSManagedObjectModel.mergedModel(from: bundles) else {
-            fatalError("Failed to create mom")
-        }
+    init(name: String, mom: NSManagedObjectModel, inMemory: Bool = false) {
         super.init(name: name, managedObjectModel: mom)
         configureDefaults(inMemory)
     }
@@ -97,7 +94,14 @@ class TestHelper {
         return ditto
     }
 
-    static func persistentContainer() -> CoreDataContainer {
-        return CoreDataContainer(name: "Model", inMemory: true)
+    static func persistentContainer(mom: NSManagedObjectModel) -> CoreDataContainer {
+        return CoreDataContainer(name: "Model", mom: mom, inMemory: true)
+    }
+    
+    static func createMom() -> NSManagedObjectModel {
+        guard let mom = NSManagedObjectModel.mergedModel(from: Bundle.allBundles) else {
+            fatalError("Failed to create mom")
+        }
+        return mom
     }
 }
