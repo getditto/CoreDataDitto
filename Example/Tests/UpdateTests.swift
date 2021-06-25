@@ -5,7 +5,7 @@ import CoreDataDitto
 import Fakery
 
 
-class InsertionTests: BaseTestCase {
+class UpdateTests: BaseTestCase {
     
     func testHydratingDittoWithInitialCoreData() {
         // we begin by seeding core data with 20 random objects

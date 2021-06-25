@@ -47,9 +47,13 @@ extension NSManagedObject {
     func setWithDittoDocument(dittoDocument: DittoDocument, managedObjectIdKeyPath: String) {
         dittoDocument.value.forEach { k, v in
             if k == "_id" {
-                self.setValue(v, forKey: managedObjectIdKeyPath)
+                if !objectEquals(a: self.value(forKey: managedObjectIdKeyPath), b: v) {
+                    self.setValue(v, forKey: managedObjectIdKeyPath)
+                }
             } else {
-                self.setValue(v, forKey: k)
+                if !objectEquals(a: self.value(forKey: k), b: v) {
+                    self.setValue(v, forKey: k)
+                }
             }
         }
     }
@@ -105,6 +109,10 @@ public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResults
 
     public let fetchRequest: NSFetchRequest<T>
     public let fetchedResultsController: NSFetchedResultsController<T>
+
+    public var managedObjectContext: NSManagedObjectContext {
+        return self.fetchedResultsController.managedObjectContext
+    }
 
     /**
      In order for this library to work, it needs to know which field in the CoreData
@@ -204,9 +212,14 @@ public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResults
             switch event {
             case .update(let info):
                 info.insertions.map({ newDocs[$0] }).forEach { doc in
-                    let managedObject = T(context: self.fetchedResultsController.managedObjectContext)
-                    managedObject.setWithDittoDocument(dittoDocument: doc, managedObjectIdKeyPath: self.managedObjectIdKeyPath)
-                    self.fetchedResultsController.managedObjectContext.insert(managedObject)
+                    let existingObject = self.fetchedResultsController.fetchedObjects?.first(where: { managedObject in
+                        managedObject.value(forKey: self.managedObjectIdKeyPath) as? NSObject == doc.id.value as? NSObject
+                    })
+                    if existingObject == nil {
+                        let managedObject = T(context: self.fetchedResultsController.managedObjectContext)
+                        managedObject.setWithDittoDocument(dittoDocument: doc, managedObjectIdKeyPath: self.managedObjectIdKeyPath)
+                        self.fetchedResultsController.managedObjectContext.insert(managedObject)
+                    }
                 }
                 info.updates.map({ newDocs[$0] }).forEach { doc in
                     let managedObject = self.fetchedResultsController.fetchedObjects?.first(where: { managedObject in
@@ -214,7 +227,8 @@ public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResults
                     }) ?? T(context: self.fetchedResultsController.managedObjectContext)
                     // we've found a managedObject with the same ids
                     managedObject.setWithDittoDocument(dittoDocument: doc, managedObjectIdKeyPath: self.managedObjectIdKeyPath)
-                    try? self.fetchedResultsController.managedObjectContext.save()
+                    // Can't call this on an in-memory CoreData instance?
+                    //try? self.fetchedResultsController.managedObjectContext.save()
                 }
                 // ditto wants to delete an object from core data
                 info.deletions.map({ info.oldDocuments[$0] }).forEach { doc in
@@ -279,4 +293,17 @@ public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResults
         self.delegate?.snapshot(snapshot: snapshot)
         self.liveSnapshot?(snapshot)
     }
+}
+
+
+func objectEquals(a: Any?, b: Any?) -> Bool {
+    let objA = a as? NSObject
+    let objB = b as? NSObject
+    if objA == nil && objB == nil {
+        return true
+    }
+    if let objA = objA, let objB = objB {
+        return objA.isEqual(objB)
+    }
+    return false
 }

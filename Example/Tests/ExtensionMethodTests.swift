@@ -9,11 +9,12 @@ class ExtensionMethodTests: XCTestCase {
 
     var ditto: Ditto!
     var fetchResultsController: NSFetchedResultsController<MenuItem>!
+    let appName = randomAppName()
 
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        ditto = TestHelper.ditto()
+        ditto = TestHelper.ditto(appName: appName)
         let fetchRequest: NSFetchRequest<MenuItem> = MenuItem.fetchRequest()
         if fetchRequest.sortDescriptors == nil {
             // in order for NSFetchedResultsController to work it _needs_ a sort descriptor
@@ -21,7 +22,7 @@ class ExtensionMethodTests: XCTestCase {
             let sort = NSSortDescriptor(key: "id", ascending: false)
             fetchRequest.sortDescriptors = [sort]
         }
-        let context = TestHelper.persistentContainer().viewContext
+        let context = TestHelper.persistentContainer(mom: TestHelper.createMom()).viewContext
         fetchResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
     }
     
