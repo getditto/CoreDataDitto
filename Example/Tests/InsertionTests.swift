@@ -121,7 +121,7 @@ class InsertionTests: XCTestCase {
 
         let managedObjectContext = self.coreDataDitto.fetchedResultsController.managedObjectContext;
         // we begin by seeding core data with 20 random objects
-        for _ in 0..<1 {
+        for _ in 0..<20 {
             let menuItem = MenuItem(context: managedObjectContext)
             menuItem.id = UUID().uuidString
             menuItem.name = Faker().commerce.productName()
