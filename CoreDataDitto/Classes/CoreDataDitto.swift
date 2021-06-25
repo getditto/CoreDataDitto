@@ -110,6 +110,10 @@ public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResults
     public let fetchRequest: NSFetchRequest<T>
     public let fetchedResultsController: NSFetchedResultsController<T>
 
+    public var managedObjectContext: NSManagedObjectContext {
+        return self.fetchedResultsController.managedObjectContext
+    }
+
     /**
      In order for this library to work, it needs to know which field in the CoreData
      entity is the primary key. Ensure that this key is unique
