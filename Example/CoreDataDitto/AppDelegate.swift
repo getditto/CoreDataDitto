@@ -8,19 +8,39 @@
 
 import UIKit
 import DittoSwift
+import CoreData
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     static var ditto: Ditto!
+    static var persistentContainer: NSPersistentContainer!
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
 
+        window = UIWindow()
+        window?.rootViewController = {
+            let nav = UINavigationController(rootViewController: ViewController())
+            nav.navigationBar.prefersLargeTitles = true
+            return nav
+        }()
+        window?.makeKeyAndVisible()
+
         Self.ditto = Ditto()
         Self.ditto.setAccessLicense(readLicenseToken())
         Self.ditto.startSync()
+
+        Self.persistentContainer = {
+            let container = NSPersistentContainer(name: "Example")
+            container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+                if let error = error as NSError? {
+                    fatalError("Unresolved error \(error), \(error.userInfo)")
+                }
+            })
+            return container
+        }()
 
         return true
     }

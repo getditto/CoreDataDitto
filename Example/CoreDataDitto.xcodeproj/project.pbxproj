@@ -12,10 +12,12 @@
 		2DBA99DA268478B900840CF6 /* license_token.txt in Resources */ = {isa = PBXBuildFile; fileRef = 2DBA99D9268478B900840CF6 /* license_token.txt */; };
 		2DBA99DB268478C300840CF6 /* license_token.txt in Resources */ = {isa = PBXBuildFile; fileRef = 2DBA99D9268478B900840CF6 /* license_token.txt */; };
 		2DBA99DE2685282700840CF6 /* ExtensionMethodTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DBA99DC268527E600840CF6 /* ExtensionMethodTests.swift */; };
+		2DD1B7DF268581E0009EEC92 /* Example.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2DD1B7DD268581E0009EEC92 /* Example.xcdatamodeld */; };
+		2DD1B7E1268596A9009EEC92 /* UpdateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DD1B7E0268596A9009EEC92 /* UpdateTests.swift */; };
+		2DD1B7E3268596BB009EEC92 /* BaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DD1B7E2268596BB009EEC92 /* BaseTest.swift */; };
 		5FB61BC0BD6DC590DDD1B433 /* Pods_CoreDataDitto_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B994F7E3258D7EC94ADFB227 /* Pods_CoreDataDitto_Example.framework */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
-		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* InsertionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* InsertionTests.swift */; };
@@ -38,12 +40,14 @@
 		2D3006432683DBCC00635A28 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		2DBA99D9268478B900840CF6 /* license_token.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = license_token.txt; path = ../license_token.txt; sourceTree = "<group>"; };
 		2DBA99DC268527E600840CF6 /* ExtensionMethodTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtensionMethodTests.swift; sourceTree = "<group>"; };
+		2DD1B7DE268581E0009EEC92 /* Example.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Example.xcdatamodel; sourceTree = "<group>"; };
+		2DD1B7E0268596A9009EEC92 /* UpdateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateTests.swift; sourceTree = "<group>"; };
+		2DD1B7E2268596BB009EEC92 /* BaseTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTest.swift; sourceTree = "<group>"; };
 		5264A706DF1397FACB37734B /* Pods_CoreDataDitto_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CoreDataDitto_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD01AFB9204008FA782 /* CoreDataDitto_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoreDataDitto_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		607FACD71AFB9204008FA782 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		607FACDA1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		607FACDC1AFB9204008FA782 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		607FACE51AFB9204008FA782 /* CoreDataDitto_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoreDataDitto_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -105,10 +109,10 @@
 			children = (
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
-				607FACD91AFB9204008FA782 /* Main.storyboard */,
 				607FACDC1AFB9204008FA782 /* Images.xcassets */,
 				607FACDE1AFB9204008FA782 /* LaunchScreen.xib */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
+				2DD1B7DD268581E0009EEC92 /* Example.xcdatamodeld */,
 			);
 			name = "Example for CoreDataDitto";
 			path = CoreDataDitto;
@@ -126,10 +130,12 @@
 			isa = PBXGroup;
 			children = (
 				607FACEB1AFB9204008FA782 /* InsertionTests.swift */,
+				2DD1B7E0268596A9009EEC92 /* UpdateTests.swift */,
 				2DBA99DC268527E600840CF6 /* ExtensionMethodTests.swift */,
 				607FACE91AFB9204008FA782 /* Supporting Files */,
 				2D30063F2683D9DB00635A28 /* TestHelper.swift */,
 				2D3006422683DBCC00635A28 /* Model.xcdatamodeld */,
+				2DD1B7E2268596BB009EEC92 /* BaseTest.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -262,7 +268,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
 				607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */,
 				2DBA99DA268478B900840CF6 /* license_token.txt in Resources */,
 				607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */,
@@ -289,6 +294,7 @@
 				"${PODS_ROOT}/Target Support Files/Pods-CoreDataDitto_Example/Pods-CoreDataDitto_Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CoreDataDitto/CoreDataDitto.framework",
 				"${BUILT_PRODUCTS_DIR}/DeepDiff/DeepDiff.framework",
+				"${BUILT_PRODUCTS_DIR}/Fakery/Fakery.framework",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/DittoObjC/DittoObjC.framework/DittoObjC",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/DittoSwift/DittoSwift.framework/DittoSwift",
 			);
@@ -296,6 +302,7 @@
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CoreDataDitto.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DeepDiff.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Fakery.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DittoObjC.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DittoSwift.framework",
 			);
@@ -374,6 +381,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
+				2DD1B7DF268581E0009EEC92 /* Example.xcdatamodeld in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -386,6 +394,8 @@
 				607FACEC1AFB9204008FA782 /* InsertionTests.swift in Sources */,
 				2DBA99DE2685282700840CF6 /* ExtensionMethodTests.swift in Sources */,
 				2D30064A2684281B00635A28 /* Model.xcdatamodeld in Sources */,
+				2DD1B7E3268596BB009EEC92 /* BaseTest.swift in Sources */,
+				2DD1B7E1268596A9009EEC92 /* UpdateTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -400,14 +410,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		607FACD91AFB9204008FA782 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				607FACDA1AFB9204008FA782 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		607FACDE1AFB9204008FA782 /* LaunchScreen.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -632,6 +634,16 @@
 			);
 			currentVersion = 2D3006432683DBCC00635A28 /* Model.xcdatamodel */;
 			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+		2DD1B7DD268581E0009EEC92 /* Example.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				2DD1B7DE268581E0009EEC92 /* Example.xcdatamodel */,
+			);
+			currentVersion = 2DD1B7DE268581E0009EEC92 /* Example.xcdatamodel */;
+			path = Example.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};

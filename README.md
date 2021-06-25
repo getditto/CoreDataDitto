@@ -14,7 +14,7 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 ## Requirements
 
 1. Clone this repo
-2. Create a `license_token.txt` file in the root of this repo.
+2. At the root of this repo run `touch license_token.txt` and paste in a valid license token.
 3. Paste in a valid license token.
 ## Installation
 
@@ -24,6 +24,15 @@ it, simply add the following line to your Podfile:
 ```ruby
 pod 'CoreDataDitto'
 ```
+
+## Architecture
+
+CoreDataDitto will attempt to sync changes from a CoreData entity using a `NSFetchResult` with a corresponding `DittoPendingCursorOperation`. For example, if you have a `MenuItem` model from CoreData, you'll want to sync it with the `menuItem` Ditto collection.
+
+1. When you call `coreDataDitto.startSync()`, first it'll loop through all CoreData objects and force Ditto match it. Any ditto documents that are not in core data will be removed.
+2. Then it will start a liveQuery to observe the `DittoPendingCursorOperation` and reflect ditto `.update` changes into CoreDataEntities
+3. `CoreDataDitto` internally uses a `NSFetchResultsController` to observe edits to CoreData objects and will translate them into Ditto `insert`, `update`, and `remove` operations
+
 
 ## Author
 
