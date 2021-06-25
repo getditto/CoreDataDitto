@@ -208,9 +208,14 @@ public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResults
             switch event {
             case .update(let info):
                 info.insertions.map({ newDocs[$0] }).forEach { doc in
-                    let managedObject = T(context: self.fetchedResultsController.managedObjectContext)
-                    managedObject.setWithDittoDocument(dittoDocument: doc, managedObjectIdKeyPath: self.managedObjectIdKeyPath)
-                    self.fetchedResultsController.managedObjectContext.insert(managedObject)
+                    let existingObject = self.fetchedResultsController.fetchedObjects?.first(where: { managedObject in
+                        managedObject.value(forKey: self.managedObjectIdKeyPath) as? NSObject == doc.id.value as? NSObject
+                    })
+                    if existingObject == nil {
+                        let managedObject = T(context: self.fetchedResultsController.managedObjectContext)
+                        managedObject.setWithDittoDocument(dittoDocument: doc, managedObjectIdKeyPath: self.managedObjectIdKeyPath)
+                        self.fetchedResultsController.managedObjectContext.insert(managedObject)
+                    }
                 }
                 info.updates.map({ newDocs[$0] }).forEach { doc in
                     let managedObject = self.fetchedResultsController.fetchedObjects?.first(where: { managedObject in
