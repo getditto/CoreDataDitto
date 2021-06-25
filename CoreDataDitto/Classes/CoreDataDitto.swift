@@ -214,7 +214,8 @@ public final class CoreDataDitto<T: NSManagedObject>: NSObject, NSFetchedResults
                     }) ?? T(context: self.fetchedResultsController.managedObjectContext)
                     // we've found a managedObject with the same ids
                     managedObject.setWithDittoDocument(dittoDocument: doc, managedObjectIdKeyPath: self.managedObjectIdKeyPath)
-                    try? self.fetchedResultsController.managedObjectContext.save()
+                    // Can't call this on an in-memory CoreData instance?
+                    //try? self.fetchedResultsController.managedObjectContext.save()
                 }
                 // ditto wants to delete an object from core data
                 info.deletions.map({ info.oldDocuments[$0] }).forEach { doc in

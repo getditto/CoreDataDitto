@@ -98,6 +98,9 @@ class InsertionTests: XCTestCase {
     }
     
     func testCoreDataInsertAndSync() {
+        try! coreDataDitto.startSync()
+        try! coreDataDitto2.startSync()
+        
         // we begin by seeding core data with 20 random objects
         let ex = XCTestExpectation(description: "Ditto documents have synced with CoreData locally")
         let ex2 = XCTestExpectation(description: "Ditto documents have synced with CoreData on second instance")
@@ -121,8 +124,6 @@ class InsertionTests: XCTestCase {
             menuItem.name = Faker().commerce.productName()
             menuItem.details = Faker().lorem.sentence()
         }
-        try! coreDataDitto.startSync()
-        try! coreDataDitto2.startSync()
         
         wait(for: [ex, ex2], timeout: 15)
     }
