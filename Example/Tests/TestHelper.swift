@@ -28,32 +28,72 @@ class CoreDataContainer: NSPersistentContainer {
     }
 }
 
+func getTopLevelDittoDir() -> URL {
+    let fileManager = FileManager.default
+    return try! fileManager.url(
+        for: .documentDirectory,
+        in: .userDomainMask,
+        appropriateFor: nil,
+        create: false
+    ).appendingPathComponent("ditto_top_level")
+}
+
+func removeDirectory(_ dir: URL) {
+    let fileManager = FileManager.default
+    do {
+        print("About to remove directory: \(dir.path)")
+        try fileManager.removeItem(at: dir)
+        print("Removed directory: \(dir.path)")
+    } catch let err {
+        print("Failed to remove directory: \(dir.path). Error: \(err.localizedDescription)")
+    }
+}
+
+func randomAppName() -> String {
+    return "test.ditto.\(ProcessInfo.processInfo.globallyUniqueString)"
+}
+
 class TestHelper {
 
-    static func ditto() -> Ditto {
+    static func ditto(appName: String) -> Ditto {
         func readLicenseToken() -> String {
             let path = Bundle.main.path(forResource: "license_token", ofType: "txt") // file path for file "data.txt"
             let string = try! String(contentsOfFile: path!, encoding: String.Encoding.utf8)
             return string
         }
-        func getTopLevelDittoDir() -> URL {
-            let fileManager = FileManager.default
-            return try! fileManager.url(
-                for: .documentDirectory,
-                in: .userDomainMask,
-                appropriateFor: nil,
-                create: false
-            ).appendingPathComponent("ditto_top_level")
-        }
-        let randomString = ProcessInfo.processInfo.globallyUniqueString
-        let appName = "test.ditto.\(randomString)"
-        let siteID = UInt64.random(in: 2...UInt64.max)
-        let dittoPersistenceDir = getTopLevelDittoDir().appendingPathComponent(randomString).appendingPathComponent("ditto")
+        
+        let appName = appName
+        let siteID: UInt64 = 1
+        let dittoPersistenceDir = getTopLevelDittoDir().appendingPathComponent(appName).appendingPathComponent("ditto")
         let ditto = Ditto(
             identity: .development(appName: appName, siteID: siteID),
             persistenceDirectory: dittoPersistenceDir
         )
         ditto.setAccessLicense(readLicenseToken())
+        let config = DittoTransportConfig()
+        config.peerToPeer.lan.isEnabled = true
+        ditto.setTransportConfig(config: config)
+        return ditto
+    }
+    
+    static func ditto2(appName: String) -> Ditto {
+        func readLicenseToken() -> String {
+            let path = Bundle.main.path(forResource: "license_token", ofType: "txt") // file path for file "data.txt"
+            let string = try! String(contentsOfFile: path!, encoding: String.Encoding.utf8)
+            return string
+        }
+        
+        let appName = appName
+        let siteID: UInt64 = 2
+        let dittoPersistenceDir = getTopLevelDittoDir().appendingPathComponent(appName).appendingPathComponent("ditto2")
+        let ditto = Ditto(
+            identity: .development(appName: appName, siteID: siteID),
+            persistenceDirectory: dittoPersistenceDir
+        )
+        ditto.setAccessLicense(readLicenseToken())
+        let config = DittoTransportConfig()
+        config.peerToPeer.lan.isEnabled = true
+        ditto.setTransportConfig(config: config)
         return ditto
     }
 

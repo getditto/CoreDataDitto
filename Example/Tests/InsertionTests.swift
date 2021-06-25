@@ -8,20 +8,34 @@ import Fakery
 class InsertionTests: XCTestCase {
 
     var ditto: Ditto!
+    var ditto2: Ditto!
     var coreDataDitto: CoreDataDitto<MenuItem>!
+    var coreDataDitto2: CoreDataDitto<MenuItem>!
     var pendingCursor: DittoPendingCursorOperation!
+    var pendingCursor2: DittoPendingCursorOperation!
+    let appName = randomAppName()
 
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        ditto = TestHelper.ditto()
+        DittoLogger.minimumLogLevel = .debug
+        ditto = TestHelper.ditto(appName: appName)
+        ditto2 = TestHelper.ditto2(appName: appName)
         pendingCursor = ditto.store["menuItems"].findAll()
+        pendingCursor2 = ditto2.store["menuItems"].findAll()
         coreDataDitto = CoreDataDitto(ditto: ditto, collection: "menuItems", pendingCursorOperation: pendingCursor, fetchRequest: MenuItem.fetchRequest(), context: TestHelper.persistentContainer().viewContext, managedObjectIdKeyPath: "id")
+        coreDataDitto2 = CoreDataDitto(ditto: ditto2, collection: "menuItems", pendingCursorOperation: pendingCursor, fetchRequest: MenuItem.fetchRequest(), context: TestHelper.persistentContainer().viewContext, managedObjectIdKeyPath: "id")
+        
+        ditto.startSync()
+        ditto2.startSync()
     }
     
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         self.coreDataDitto?.stop()
+        ditto.stopSync()
+        ditto2.stopSync()
+        removeDirectory(getTopLevelDittoDir())
         super.tearDown()
     }
     
@@ -43,6 +57,8 @@ class InsertionTests: XCTestCase {
             menuItem.details = Faker().lorem.sentence()
         }
         try! coreDataDitto.startSync()
+        
+        wait(for: [ex], timeout: 5)
     }
 
     func testHydratingDittoWithCoreData() {
@@ -79,6 +95,36 @@ class InsertionTests: XCTestCase {
             menuItem.details = Faker().lorem.sentence()
         }
         wait(for: [ex], timeout: 5)
+    }
+    
+    func testCoreDataInsertAndSync() {
+        // we begin by seeding core data with 20 random objects
+        let ex = XCTestExpectation(description: "Ditto documents have synced with CoreData locally")
+        let ex2 = XCTestExpectation(description: "Ditto documents have synced with CoreData on second instance")
+        self.coreDataDitto.liveSnapshot = { (snapshot) in
+            if (snapshot.documents.count == 20 && snapshot.managedObjects.count == 20) {
+                ex.fulfill()
+            }
+        }
+        
+        self.coreDataDitto2.liveSnapshot = { (snapshot) in
+            if (snapshot.documents.count == 20 && snapshot.managedObjects.count == 20) {
+                ex2.fulfill()
+            }
+        }
+
+        let managedObjectContext = self.coreDataDitto.fetchedResultsController.managedObjectContext;
+        // we begin by seeding core data with 20 random objects
+        for _ in 0..<20 {
+            let menuItem = MenuItem(context: managedObjectContext)
+            menuItem.id = UUID().uuidString
+            menuItem.name = Faker().commerce.productName()
+            menuItem.details = Faker().lorem.sentence()
+        }
+        try! coreDataDitto.startSync()
+        try! coreDataDitto2.startSync()
+        
+        wait(for: [ex, ex2], timeout: 15)
     }
 }
 
