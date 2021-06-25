@@ -57,7 +57,7 @@ class ViewController: UIViewController {
         let task = Task(context: coreDataDitto.managedObjectContext)
         task.id = UUID().uuidString
         task.body = Faker().lorem.sentence()
-        task.isDone = Bool.random()
+        task.isDone = false
     }
 
     @objc func clearButtonDidClick(sender: UIBarButtonItem) {
