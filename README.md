@@ -5,7 +5,9 @@
 [![License](https://img.shields.io/cocoapods/l/CoreDataDitto.svg?style=flat)](https://cocoapods.org/pods/CoreDataDitto)
 [![Platform](https://img.shields.io/cocoapods/p/CoreDataDitto.svg?style=flat)](https://cocoapods.org/pods/CoreDataDitto)
 
-This is an experimental library that watches CoreData changes and reflects them into Ditto. Any Ditto `.update` observable events are insert, updated, or removed from CoreData
+![](./Example/CoreDataDitto/Images.xcassets/AppIcon.appiconset/AppIcon-1024px.png)
+
+This is an __experimental__ library that watches CoreData changes and reflects them into Ditto. Any Ditto `.update` observable events are insert, updated, or removed from CoreData
 ## Example
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
@@ -25,7 +27,6 @@ it, simply add the following line to your Podfile:
 pod 'DittoSwift', '~> 1.0.4'
 pod 'CoreDataDitto'
 ```
-
 
 ## Quick Start
 
@@ -48,7 +49,6 @@ let token = managedObjectContext.bind(to: ditto, primaryKeyPath: \Task.id, colle
     self.tableView.reloadData()
 }
 ```
-
 
 ## Architecture
 
