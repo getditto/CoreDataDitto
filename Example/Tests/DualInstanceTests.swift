@@ -73,7 +73,7 @@ class DualInstanceTests: BaseTestCase {
         
         try! managedContext1.save()
         
-        wait(for: [ex2], timeout: 120)
+        wait(for: [ex2], timeout: 10)
         
         token1.stop()
         token2.stop()

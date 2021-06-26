@@ -24,6 +24,8 @@ class BaseTestCase: XCTestCase {
     var managedContext1: NSManagedObjectContext!
     var managedContext2: NSManagedObjectContext!
     var fetchRequest: NSFetchRequest<MenuItem>!
+    
+    static let mom = TestHelper.createMom()
 
     override func setUp() {
         super.setUp()
@@ -31,9 +33,8 @@ class BaseTestCase: XCTestCase {
         DittoLogger.minimumLogLevel = .debug
         ditto1 = TestHelper.ditto1(appName: appName)
         ditto2 = TestHelper.ditto2(appName: appName)
-        mom = TestHelper.createMom()
-        coreData1 = TestHelper.persistentContainer(mom: mom)
-        coreData2 = TestHelper.persistentContainer(mom: mom)
+        coreData1 = TestHelper.persistentContainer(mom: BaseTestCase.mom)
+        coreData2 = TestHelper.persistentContainer(mom: BaseTestCase.mom)
         coreData1.loadPersistentStores { description, err in
             self.managedContext1 = self.coreData1.viewContext
         }

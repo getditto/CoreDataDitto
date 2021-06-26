@@ -35,7 +35,7 @@ extension NSManagedObjectContext {
         collectionName: String,
         snapshotCallBack: @escaping SnapshotCallBack<T>
     ) -> Token<T, V> {
-
+        while T.entity().name == nil { }
         // NSFetchedResultsController requires a sort direction
         let fetchRequest: NSFetchRequest<T> = NSFetchRequest<T>(entityName: T.entity().name!)
         let sort = NSSortDescriptor(key: primaryKeyPath._kvcKeyPathString!, ascending: true)
