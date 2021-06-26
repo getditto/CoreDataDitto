@@ -19,6 +19,8 @@ class BaseTestCase: XCTestCase {
     var ditto2: Ditto!
     var mom: NSManagedObjectModel!
     var appName = randomAppName()
+    var coreData1: CoreDataContainer!
+    var coreData2: CoreDataContainer!
     var managedContext1: NSManagedObjectContext!
     var managedContext2: NSManagedObjectContext!
     var fetchRequest: NSFetchRequest<MenuItem>!
@@ -30,8 +32,14 @@ class BaseTestCase: XCTestCase {
         ditto1 = TestHelper.ditto1(appName: appName)
         ditto2 = TestHelper.ditto2(appName: appName)
         mom = TestHelper.createMom()
-        managedContext1 = TestHelper.persistentContainer(mom: mom).viewContext
-        managedContext2 = TestHelper.persistentContainer(mom: mom).viewContext
+        coreData1 = TestHelper.persistentContainer(mom: mom)
+        coreData2 = TestHelper.persistentContainer(mom: mom)
+        coreData1.loadPersistentStores { description, err in
+            self.managedContext1 = self.coreData1.viewContext
+        }
+        coreData2.loadPersistentStores { description, err in
+            self.managedContext2 = self.coreData2.viewContext
+        }
 
         ditto1.startSync()
         ditto2.startSync()

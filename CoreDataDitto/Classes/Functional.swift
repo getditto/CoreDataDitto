@@ -54,75 +54,67 @@ extension NSManagedObjectContext {
         fetchController.delegate = fetchObserver
 
         /**
-         Initial Fetch
-         Here we go through ditto and the context managed objects and we force ditto to match the core data objects
-         */
-
-        let docs = pendingCursorOperation.exec()
-        let managedObjects = fetchController.fetchedObjects ?? []
-        let managedObjectIds = managedObjects.map({ $0[keyPath: primaryKeyPath] as! NSObject })
-        ditto.store.write { trx in
-            docs.forEach { doc in
-                if managedObjectIds.contains(doc.docId) {
-                    // update it
-                    if let managedObject = managedObjects.first(where: { $0[keyPath: primaryKeyPath] as! NSObject == doc.docId }) {
-                        trx[collectionName].findByID(doc.id).update { mutableDoc in
-                            mutableDoc?.setWithManagedObject(managedObject: managedObject, managedObjectIdKeyPath: primaryKeyPath)
-                        }
-                    }
-
-                } else {
-                    // delete it
-                    trx[collectionName].findByID(doc.id).remove()
-                }
-            }
-
-            managedObjects.forEach { managedObject in
-                let managedObjectId = managedObject[keyPath: primaryKeyPath] as! NSObject
-                if !docs.map({ $0.docId }).contains(managedObjectId) {
-                    // docs don't contain this managed object id, create the document
-                    let dictionary = managedObject.asDittoDictionary(managedObjectIdKeyPath: primaryKeyPath)
-                    try! trx[collectionName].insert(dictionary)
-                }
-            }
-        }
-        snapshotCallBack(managedObjects)
-
-        /**
          Subsequent Updates From Ditto
          */
         let liveQuery = pendingCursorOperation.observe { docs, event in
             switch event {
-            // notice that we skip .initial, which we handled above
+            /**
+             Initial Fetch
+             Here we go through ditto and the context managed objects and we force ditto to match the core data objects
+             */
+            case .initial:
+                let managedObjects = fetchController.fetchedObjects ?? []
+                ditto.store.write { trx in
+                    docs.forEach { doc in
+                        // update it
+                        if let managedObject = managedObjects.first(where: { $0[keyPath: primaryKeyPath] as! NSObject == doc.docId }) {
+                            trx[collectionName].findByID(doc.id).update { mutableDoc in
+                                mutableDoc?.setWithManagedObject(managedObject: managedObject, managedObjectIdKeyPath: primaryKeyPath)
+                            }
+                        } else {
+                            // delete it
+                            trx[collectionName].findByID(doc.id).remove()
+                        }
+                    }
+
+                    managedObjects.forEach { managedObject in
+                        let managedObjectId = managedObject[keyPath: primaryKeyPath] as! NSObject
+                        if !docs.map({ $0.docId }).contains(managedObjectId) {
+                            // docs don't contain this managed object id, create the document
+                            let dictionary = managedObject.asDittoDictionary(managedObjectIdKeyPath: primaryKeyPath)
+                            try! trx[collectionName].insert(dictionary)
+                        }
+                    }
+                    print("Did an initial write!")
+                }
+                // DO YOU ACTUALLY NEED TO CALL THIS?
+                snapshotCallBack(managedObjects)
             case .update(let info):
                 let managedObjects = (fetchController.fetchedObjects ?? [])
-                ditto.store.write { trx in
-                    let oldDocs = info.oldDocuments
+                let oldDocs = info.oldDocuments
 
-                    func upsertDocumentIntoManagedObject(doc: DittoDocument) throws {
-                        if let foundManagedObject = managedObjects.first(where: { $0.docId(primaryKeyPath: primaryKeyPath)  == doc.docId }) {
-                            foundManagedObject.setWithDittoDocumentValues(dittoDocument: doc, primaryKeyPath: primaryKeyPath)
-                        } else {
-                            let managedObject = T(context: self)
-                            managedObject.setWithDittoDocumentValues(dittoDocument: doc, primaryKeyPath: primaryKeyPath)
-                        }
-                        try self.save()
-                    }
-
-                    info.insertions.map { docs[$0] }.forEach { doc in
-                        try! upsertDocumentIntoManagedObject(doc: doc)
-                    }
-                    info.updates.map { docs[$0] }.forEach { doc in
-                        try! upsertDocumentIntoManagedObject(doc: doc)
-                    }
-                    info.deletions.map { oldDocs[$0].docId }.forEach { docId in
-                        guard let managedObject = (fetchController.fetchedObjects ?? []).first(where: { $0.docId(primaryKeyPath: primaryKeyPath) == docId }) else { return }
-                        self.delete(managedObject)
+                func upsertDocumentIntoManagedObject(doc: DittoDocument) {
+                    if let foundManagedObject = managedObjects.first(where: { $0.docId(primaryKeyPath: primaryKeyPath)  == doc.docId }) {
+                        foundManagedObject.setWithDittoDocumentValues(dittoDocument: doc, primaryKeyPath: primaryKeyPath)
+                    } else {
+                        let managedObject = T(context: self)
+                        managedObject.setWithDittoDocumentValues(dittoDocument: doc, primaryKeyPath: primaryKeyPath)
                     }
                 }
-                break;
-            default:
-                break
+
+                info.insertions.map { docs[$0] }.forEach { doc in
+                    upsertDocumentIntoManagedObject(doc: doc)
+                }
+                info.updates.map { docs[$0] }.forEach { doc in
+                    upsertDocumentIntoManagedObject(doc: doc)
+                }
+                info.deletions.map { oldDocs[$0].docId }.forEach { docId in
+                    guard let managedObject = (fetchController.fetchedObjects ?? []).first(where: { $0.docId(primaryKeyPath: primaryKeyPath) == docId }) else { return }
+                    self.delete(managedObject)
+                }
+                
+                // Must call save after the Ditto write txn to prevent nested txns
+                try! self.save()
             }
         }
         return Token(liveQuery: liveQuery, fetchObserver: fetchObserver)
@@ -147,33 +139,31 @@ class FetchObserver<T: NSManagedObject, V>: NSObject, NSFetchedResultsController
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         guard let managedObjects = controller.fetchedObjects as? [T] else { return }
         let managedObject = anObject as! T
-        self.ditto.store.write { trx in
-            switch type {
-            case .insert:
-                let dictionary = managedObject.asDittoDictionary(managedObjectIdKeyPath: self.primaryKeyPath)
-                try! trx[self.collectionName].insert(dictionary)
-                break
-            case .delete:
-                // the user is attempting to delete an object, this call
-                let docId = managedObject.docId(primaryKeyPath: self.primaryKeyPath)
-                trx[self.collectionName].findByID(DittoDocumentID(value: docId)).remove()
-                break
-            case .move:
-                // we sorted both the pending cursor and fetch results by the primary key
-                // objects should not move
-                break
-            case .update:
-                let docId = managedObject.docId(primaryKeyPath: self.primaryKeyPath)
-                let dictionary = managedObject.asDittoDictionary(managedObjectIdKeyPath: self.primaryKeyPath)
-                if trx[self.collectionName].findByID(DittoDocumentID(value: docId)).exec() == nil {
-                    try! trx[self.collectionName].insert(dictionary)
-                } else {
-                    trx[self.collectionName].findByID(DittoDocumentID(value: docId)).update { mutable in
-                        mutable?.setWithManagedObject(managedObject: managedObject, managedObjectIdKeyPath: self.primaryKeyPath)
-                    }
+        switch type {
+        case .insert:
+            let dictionary = managedObject.asDittoDictionary(managedObjectIdKeyPath: self.primaryKeyPath)
+            try! self.ditto.store[self.collectionName].insert(dictionary)
+            break
+        case .delete:
+            // the user is attempting to delete an object, this call
+            let docId = managedObject.docId(primaryKeyPath: self.primaryKeyPath)
+            self.ditto.store[self.collectionName].findByID(DittoDocumentID(value: docId)).remove()
+            break
+        case .move:
+            // we sorted both the pending cursor and fetch results by the primary key
+            // objects should not move
+            break
+        case .update:
+            let docId = managedObject.docId(primaryKeyPath: self.primaryKeyPath)
+            let dictionary = managedObject.asDittoDictionary(managedObjectIdKeyPath: self.primaryKeyPath)
+            if self.ditto.store[self.collectionName].findByID(DittoDocumentID(value: docId)).exec() == nil {
+                try! self.ditto.store[self.collectionName].insert(dictionary)
+            } else {
+                self.ditto.store[self.collectionName].findByID(DittoDocumentID(value: docId)).update { mutable in
+                    mutable?.setWithManagedObject(managedObject: managedObject, managedObjectIdKeyPath: self.primaryKeyPath)
                 }
-                break
             }
+            break
         }
         callback(managedObjects)
     }

@@ -52,10 +52,29 @@ extension NSManagedObject {
         dittoDocument: DittoDocument,
         primaryKeyPath: KeyPath<Root, Value>
     ) {
-        var dictionaryOfDittoDocument = dittoDocument.value
-        dictionaryOfDittoDocument.removeValue(forKey: "_id")
-        self.setValue(dittoDocument.id.value, forKey: primaryKeyPath._kvcKeyPathString!)
-        self.setValuesForKeys(dictionaryOfDittoDocument as [String : Any])
+        dittoDocument.value.forEach { k, v in
+            if k == "_id" {
+                if !objectEquals(a: self.value(forKey: primaryKeyPath._kvcKeyPathString!), b: v) {
+                    self.setValue(v, forKey: primaryKeyPath._kvcKeyPathString!)
+                }
+            } else {
+                if !objectEquals(a: self.value(forKey: k), b: v) {
+                    self.setValue(v, forKey: k)
+                }
+            }
+        }
+    }
+    
+    func objectEquals(a: Any?, b: Any?) -> Bool {
+        let objA = a as? NSObject
+        let objB = b as? NSObject
+        if objA == nil && objB == nil {
+            return true
+        }
+        if let objA = objA, let objB = objB {
+            return objA.isEqual(objB)
+        }
+        return false
     }
 }
 
