@@ -85,9 +85,8 @@ extension NSManagedObjectContext {
                             try! trx[collectionName].insert(dictionary)
                         }
                     }
-                    print("Did an initial write!")
                 }
-                // DO YOU ACTUALLY NEED TO CALL THIS?
+                
                 snapshotCallBack(managedObjects)
             case .update(let info):
                 let managedObjects = (fetchController.fetchedObjects ?? [])
@@ -113,7 +112,6 @@ extension NSManagedObjectContext {
                     self.delete(managedObject)
                 }
                 
-                // Must call save after the Ditto write txn to prevent nested txns
                 try! self.save()
             }
         }
