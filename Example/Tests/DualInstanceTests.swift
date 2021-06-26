@@ -44,19 +44,21 @@ class DualInstanceTests: BaseTestCase {
         let ex2 = expectation(description: "Updated MenuItem synced")
         ex2.assertForOverFulfill = false
         
-        let details1 = Faker().lorem.sentence()
-        let details2 = Faker().lorem.sentence()
+        let details1 = "Adam"
+        let details2 = "Max"
         
         let token1 = managedContext1.bind(to: ditto1, primaryKeyPath: \MenuItem.id, collectionName: "menuItems") { items in
-            //
+            // Unused
         }
 
         let token2 = managedContext2.bind(to: ditto2, primaryKeyPath: \MenuItem.id, collectionName: "menuItems") { items in
-            if let item = items.first, item.details == details1 {
-                ex1.fulfill()
-            }
-            if let item = items.first, item.details == details2 {
-                ex2.fulfill()
+            if let item = items.first {
+                if item.details == details1 {
+                    ex1.fulfill()
+                }
+                else if item.details == details2 {
+                    ex2.fulfill()
+                }
             }
         }
 
@@ -71,7 +73,7 @@ class DualInstanceTests: BaseTestCase {
         
         try! managedContext1.save()
         
-        wait(for: [ex2], timeout: 10)
+        wait(for: [ex2], timeout: 120)
         
         token1.stop()
         token2.stop()

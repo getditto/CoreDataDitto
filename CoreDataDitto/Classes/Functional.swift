@@ -52,7 +52,7 @@ extension NSManagedObjectContext {
             snapshotCallBack(items)
         }
         fetchController.delegate = fetchObserver
-
+        
         /**
          Subsequent Updates From Ditto
          */
@@ -76,7 +76,7 @@ extension NSManagedObjectContext {
                             trx[collectionName].findByID(doc.id).remove()
                         }
                     }
-
+                    
                     managedObjects.forEach { managedObject in
                         let managedObjectId = managedObject[keyPath: primaryKeyPath] as! NSObject
                         if !docs.map({ $0.docId }).contains(managedObjectId) {
@@ -86,7 +86,6 @@ extension NSManagedObjectContext {
                         }
                     }
                 }
-                
                 snapshotCallBack(managedObjects)
             case .update(let info):
                 let managedObjects = (fetchController.fetchedObjects ?? [])
@@ -140,7 +139,10 @@ class FetchObserver<T: NSManagedObject, V>: NSObject, NSFetchedResultsController
         switch type {
         case .insert:
             let dictionary = managedObject.asDittoDictionary(managedObjectIdKeyPath: self.primaryKeyPath)
-            try! self.ditto.store[self.collectionName].insert(dictionary)
+            let docId = managedObject.docId(primaryKeyPath: self.primaryKeyPath)
+            if self.ditto.store[self.collectionName].findByID(docId).exec() == nil {
+                try! self.ditto.store[self.collectionName].insert(dictionary)
+            }
             break
         case .delete:
             // the user is attempting to delete an object, this call

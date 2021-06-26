@@ -15,7 +15,7 @@
 		2DD1B7DF268581E0009EEC92 /* Example.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2DD1B7DD268581E0009EEC92 /* Example.xcdatamodeld */; };
 		2DD1B7E3268596BB009EEC92 /* BaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DD1B7E2268596BB009EEC92 /* BaseTest.swift */; };
 		2DD1B7EB26864BCC009EEC92 /* SingleInstanceInsertionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DD1B7EA26864BCC009EEC92 /* SingleInstanceInsertionTests.swift */; };
-		2DD1B7EF26869525009EEC92 /* DualInstanceInsertionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DD1B7EE26869525009EEC92 /* DualInstanceInsertionTests.swift */; };
+		2DD1B7EF26869525009EEC92 /* DualInstanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DD1B7EE26869525009EEC92 /* DualInstanceTests.swift */; };
 		5FB61BC0BD6DC590DDD1B433 /* Pods_CoreDataDitto_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B994F7E3258D7EC94ADFB227 /* Pods_CoreDataDitto_Example.framework */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
@@ -43,7 +43,7 @@
 		2DD1B7DE268581E0009EEC92 /* Example.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Example.xcdatamodel; sourceTree = "<group>"; };
 		2DD1B7E2268596BB009EEC92 /* BaseTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTest.swift; sourceTree = "<group>"; };
 		2DD1B7EA26864BCC009EEC92 /* SingleInstanceInsertionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SingleInstanceInsertionTests.swift; sourceTree = "<group>"; };
-		2DD1B7EE26869525009EEC92 /* DualInstanceInsertionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DualInstanceInsertionTests.swift; sourceTree = "<group>"; };
+		2DD1B7EE26869525009EEC92 /* DualInstanceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DualInstanceTests.swift; sourceTree = "<group>"; };
 		5264A706DF1397FACB37734B /* Pods_CoreDataDitto_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CoreDataDitto_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD01AFB9204008FA782 /* CoreDataDitto_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoreDataDitto_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -130,7 +130,7 @@
 			isa = PBXGroup;
 			children = (
 				2DD1B7EA26864BCC009EEC92 /* SingleInstanceInsertionTests.swift */,
-				2DD1B7EE26869525009EEC92 /* DualInstanceInsertionTests.swift */,
+				2DD1B7EE26869525009EEC92 /* DualInstanceTests.swift */,
 				2DBA99DC268527E600840CF6 /* ExtensionMethodTests.swift */,
 				607FACE91AFB9204008FA782 /* Supporting Files */,
 				2D30063F2683D9DB00635A28 /* TestHelper.swift */,
@@ -394,7 +394,7 @@
 				2DBA99DE2685282700840CF6 /* ExtensionMethodTests.swift in Sources */,
 				2D30064A2684281B00635A28 /* Model.xcdatamodeld in Sources */,
 				2DD1B7E3268596BB009EEC92 /* BaseTest.swift in Sources */,
-				2DD1B7EF26869525009EEC92 /* DualInstanceInsertionTests.swift in Sources */,
+				2DD1B7EF26869525009EEC92 /* DualInstanceTests.swift in Sources */,
 				2DD1B7EB26864BCC009EEC92 /* SingleInstanceInsertionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

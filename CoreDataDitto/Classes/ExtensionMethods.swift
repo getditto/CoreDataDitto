@@ -64,18 +64,6 @@ extension NSManagedObject {
             }
         }
     }
-    
-    func objectEquals(a: Any?, b: Any?) -> Bool {
-        let objA = a as? NSObject
-        let objB = b as? NSObject
-        if objA == nil && objB == nil {
-            return true
-        }
-        if let objA = objA, let objB = objB {
-            return objA.isEqual(objB)
-        }
-        return false
-    }
 }
 
 extension DittoDocument {
@@ -96,8 +84,23 @@ extension DittoMutableDocument {
     ///   - managedObjectIdKeyPath: the primary key field for this core data object used to set the `_id`
     func setWithManagedObject<Root, Value>(managedObject: NSManagedObject, managedObjectIdKeyPath: KeyPath<Root, Value>) {
         let dict = managedObject.valuesWithoutId(managedObjectIdKeyPath: managedObjectIdKeyPath)
+        let dittoDict = self.value
         dict.forEach { (key, value) in
-            self[key].set(value)
+            if let dittoValue = dittoDict[key], !objectEquals(a: dittoValue, b: value) {
+                self[key].set(value)
+            }
         }
     }
+}
+
+func objectEquals(a: Any?, b: Any?) -> Bool {
+    let objA = a as? NSObject
+    let objB = b as? NSObject
+    if objA == nil && objB == nil {
+        return true
+    }
+    if let objA = objA, let objB = objB {
+        return objA.isEqual(objB)
+    }
+    return false
 }
