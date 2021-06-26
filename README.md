@@ -60,7 +60,7 @@ CoreDataDitto will attempt to sync changes from a CoreData entity using a `NSFet
 
 Important:
 
-This library does _not_ handle relationships.
+This library does _not_ handle relationships and will attempt to sync the _entire_ entities 
 
 ## Author
 
