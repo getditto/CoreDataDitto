@@ -21,6 +21,11 @@ extension NSManagedObject {
     }
 
 
+
+    /// Retrieves the document id from the managed object as an `NSObject`
+    /// This is primarily a utility method for easy equality comparisons
+    /// - Parameter primaryKeyPath: <#primaryKeyPath description#>
+    /// - Returns: <#description#>
     func docId<Root, V>(primaryKeyPath: KeyPath<Root, V>) -> NSObject {
         return self.value(forKey:primaryKeyPath._kvcKeyPathString!) as! NSObject
     }
