@@ -14,7 +14,7 @@ class ExtensionMethodTests: XCTestCase {
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        ditto = TestHelper.ditto(appName: appName)
+        ditto = TestHelper.ditto1(appName: appName)
         let fetchRequest: NSFetchRequest<MenuItem> = MenuItem.fetchRequest()
         if fetchRequest.sortDescriptors == nil {
             // in order for NSFetchedResultsController to work it _needs_ a sort descriptor
@@ -50,10 +50,16 @@ class ExtensionMethodTests: XCTestCase {
         XCTAssertEqual(menuItem.name, foundDocument["name"].stringValue)
         XCTAssertEqual(menuItem.details, foundDocument["details"].stringValue)
         XCTAssertEqual(menuItem.price, foundDocument["price"].doubleValue)
+    }
 
-        XCTAssert(menuItem.isEqual(to: foundDocument, managedObjectIdKeyPath: "id"))
-        XCTAssert(foundDocument.isEqual(to: menuItem, managedObjectIdKeyPath: "id"))
+    func testDictionaryFromManagedObject() {
+        let menuItem = MenuItem(context: fetchResultsController.managedObjectContext)
+        menuItem.id = UUID().uuidString
+        menuItem.name = Faker().lorem.sentence()
+        menuItem.details = Faker().lorem.sentence()
 
+        let dict = menuItem.asDittoDictionary(managedObjectIdKeyPath: \MenuItem.id)
+        print(dict)
     }
 
 }

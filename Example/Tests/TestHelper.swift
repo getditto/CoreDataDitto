@@ -52,16 +52,16 @@ func randomAppName() -> String {
 
 class TestHelper {
 
-    static func ditto(appName: String) -> Ditto {
-        func readLicenseToken() -> String {
-            let path = Bundle.main.path(forResource: "license_token", ofType: "txt") // file path for file "data.txt"
-            let string = try! String(contentsOfFile: path!, encoding: String.Encoding.utf8)
-            return string
-        }
-        
+    static func readLicenseToken() -> String {
+        let path = Bundle.main.path(forResource: "license_token", ofType: "txt") // file path for file "data.txt"
+        let string = try! String(contentsOfFile: path!, encoding: String.Encoding.utf8)
+        return string
+    }
+
+    static func ditto1(appName: String) -> Ditto {
         let appName = appName
         let siteID: UInt64 = 1
-        let dittoPersistenceDir = getTopLevelDittoDir().appendingPathComponent(appName).appendingPathComponent("ditto")
+        let dittoPersistenceDir = getTopLevelDittoDir().appendingPathComponent(appName).appendingPathComponent("ditto1")
         let ditto = Ditto(
             identity: .development(appName: appName, siteID: siteID),
             persistenceDirectory: dittoPersistenceDir
@@ -74,12 +74,6 @@ class TestHelper {
     }
     
     static func ditto2(appName: String) -> Ditto {
-        func readLicenseToken() -> String {
-            let path = Bundle.main.path(forResource: "license_token", ofType: "txt") // file path for file "data.txt"
-            let string = try! String(contentsOfFile: path!, encoding: String.Encoding.utf8)
-            return string
-        }
-        
         let appName = appName
         let siteID: UInt64 = 2
         let dittoPersistenceDir = getTopLevelDittoDir().appendingPathComponent(appName).appendingPathComponent("ditto2")
