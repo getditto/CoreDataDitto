@@ -28,7 +28,7 @@ public final class Token<T: NSManagedObject, V> {
 public typealias SnapshotCallBack<T> = ([T]) -> Void
 
 extension NSManagedObjectContext {
-
+    
     public func bind<T: NSManagedObject, V>(
         to ditto: Ditto,
         primaryKeyPath: KeyPath<T, V>,
@@ -43,54 +43,63 @@ extension NSManagedObjectContext {
         // We create the exact matched pending cursor for Ditto's side. Notice that we are also sorting on the _id like the
         // NSSortDescriptor above.
         let pendingCursorOperation = ditto.store[collectionName].findAll().sort("_id", direction: .ascending)
-
+        
         // hydrate the fetch results controller
         let fetchController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self, sectionNameKeyPath: nil, cacheName: nil)
         try! fetchController.performFetch()
-
+        
         let fetchObserver = FetchObserver(ditto: ditto, collectionName: collectionName, primaryKeyPath: primaryKeyPath) { items in
             snapshotCallBack(items)
         }
         fetchController.delegate = fetchObserver
         
         /**
+         Initial Fetch
+         Here we go through ditto and the context managed objects and we force ditto to match the core data objects
+         */
+        
+        let docs = pendingCursorOperation.exec()
+        let managedObjects = fetchController.fetchedObjects ?? []
+        let managedObjectIds = managedObjects.map({ $0[keyPath: primaryKeyPath] as! NSObject })
+        ditto.store.write { trx in
+            docs.forEach { doc in
+                if managedObjectIds.contains(doc.docId) {
+                    // update it
+                    if let managedObject = managedObjects.first(where: { $0[keyPath: primaryKeyPath] as! NSObject == doc.docId }) {
+                        trx[collectionName].findByID(doc.id).update { mutableDoc in
+                            mutableDoc?.setWithManagedObject(managedObject: managedObject, managedObjectIdKeyPath: primaryKeyPath)
+                        }
+                    }
+                    
+                } else {
+                    // delete it
+                    trx[collectionName].findByID(doc.id).remove()
+                }
+            }
+            
+            managedObjects.forEach { managedObject in
+                let managedObjectId = managedObject[keyPath: primaryKeyPath] as! NSObject
+                if !docs.map({ $0.docId }).contains(managedObjectId) {
+                    // docs don't contain this managed object id, create the document
+                    let dictionary = managedObject.asDittoDictionary(managedObjectIdKeyPath: primaryKeyPath)
+                    try! trx[collectionName].insert(dictionary)
+                }
+            }
+        }
+        snapshotCallBack(managedObjects)
+        
+        /**
          Subsequent Updates From Ditto
          */
         let liveQuery = pendingCursorOperation.observe { docs, event in
             switch event {
-            /**
-             Initial Fetch
-             Here we go through ditto and the context managed objects and we force ditto to match the core data objects
-             */
             case .initial:
-                let managedObjects = fetchController.fetchedObjects ?? []
-                ditto.store.write { trx in
-                    docs.forEach { doc in
-                        // update it
-                        if let managedObject = managedObjects.first(where: { $0[keyPath: primaryKeyPath] as! NSObject == doc.docId }) {
-                            trx[collectionName].findByID(doc.id).update { mutableDoc in
-                                mutableDoc?.setWithManagedObject(managedObject: managedObject, managedObjectIdKeyPath: primaryKeyPath)
-                            }
-                        } else {
-                            // delete it
-                            trx[collectionName].findByID(doc.id).remove()
-                        }
-                    }
-                    
-                    managedObjects.forEach { managedObject in
-                        let managedObjectId = managedObject[keyPath: primaryKeyPath] as! NSObject
-                        if !docs.map({ $0.docId }).contains(managedObjectId) {
-                            // docs don't contain this managed object id, create the document
-                            let dictionary = managedObject.asDittoDictionary(managedObjectIdKeyPath: primaryKeyPath)
-                            try! trx[collectionName].insert(dictionary)
-                        }
-                    }
-                }
-                snapshotCallBack(managedObjects)
+                // skip .initial, which we handled above
+                break
             case .update(let info):
                 let managedObjects = (fetchController.fetchedObjects ?? [])
                 let oldDocs = info.oldDocuments
-
+                
                 func upsertDocumentIntoManagedObject(doc: DittoDocument) {
                     if let foundManagedObject = managedObjects.first(where: { $0.docId(primaryKeyPath: primaryKeyPath)  == doc.docId }) {
                         foundManagedObject.setWithDittoDocumentValues(dittoDocument: doc, primaryKeyPath: primaryKeyPath)
@@ -99,7 +108,7 @@ extension NSManagedObjectContext {
                         managedObject.setWithDittoDocumentValues(dittoDocument: doc, primaryKeyPath: primaryKeyPath)
                     }
                 }
-
+                
                 info.insertions.map { docs[$0] }.forEach { doc in
                     upsertDocumentIntoManagedObject(doc: doc)
                 }
@@ -119,20 +128,20 @@ extension NSManagedObjectContext {
 }
 
 class FetchObserver<T: NSManagedObject, V>: NSObject, NSFetchedResultsControllerDelegate {
-
+    
     private let ditto: Ditto
     private let collectionName: String
     private let primaryKeyPath: KeyPath<T, V>
-
+    
     let callback: SnapshotCallBack<T>
-
+    
     init(ditto: Ditto, collectionName: String, primaryKeyPath: KeyPath<T, V>, _ callback: @escaping SnapshotCallBack<T>) {
         self.ditto = ditto
         self.collectionName = collectionName
         self.callback = callback
         self.primaryKeyPath = primaryKeyPath
     }
-
+    
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         guard let managedObjects = controller.fetchedObjects as? [T] else { return }
         let managedObject = anObject as! T
@@ -167,5 +176,5 @@ class FetchObserver<T: NSManagedObject, V>: NSObject, NSFetchedResultsController
         }
         callback(managedObjects)
     }
-
+    
 }
