@@ -21,7 +21,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  CoreDataDitto: a0d370d182a73234be65cc79ce3ba498a1a39111
+  CoreDataDitto: 7f28d7fd1ac9b750700afc83eb86d73962e6cb0e
   DittoObjC: 2b43a649452c955284365dbc714369cef18e4fca
   DittoSwift: 68612d60faf2816fda12ff01ed849ec88571f84b
   Fakery: a90caff00ca5cacde6c161c3eafc72314a03d34d

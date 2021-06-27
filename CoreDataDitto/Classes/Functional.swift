@@ -121,6 +121,8 @@ extension NSManagedObjectContext {
                 }
                 
                 try! self.save()
+            @unknown default:
+                break
             }
         }
         return Token(liveQuery: liveQuery, fetchObserver: fetchObserver)
@@ -173,6 +175,8 @@ class FetchObserver<T: NSManagedObject, V>: NSObject, NSFetchedResultsController
                 }
             }
             break
+        @unknown default:
+            fatalError("NSFetchResultsChangeType sent an unknown enum case that is not handled by this library.")
         }
         callback(managedObjects)
     }
