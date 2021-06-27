@@ -70,7 +70,7 @@ extension DittoMutableDocument {
     /// - Parameters:
     ///   - managedObject: The core data managed object
     ///   - managedObjectIdKeyPath: the primary key field for this core data object used to set the `_id`
-    func setWithManagedObject<Root, Value>(managedObject: NSManagedObject, managedObjectIdKeyPath: KeyPath<Root, Value>) {
+    public func setWithManagedObject<Root, Value>(managedObject: NSManagedObject, managedObjectIdKeyPath: KeyPath<Root, Value>) {
         let dict = managedObject.valuesWithoutId(managedObjectIdKeyPath: managedObjectIdKeyPath)
         let dittoDict = self.value
         dict.forEach { (key, value) in

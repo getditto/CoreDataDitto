@@ -21,17 +21,17 @@ Pod::Spec.new do |s|
 TODO: Add long description of the pod here.
                        DESC
 
-  s.homepage         = 'https://github.com/2183729/CoreDataDitto'
+  s.homepage         = 'https://github.com/getditto/CoreDataDitto
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { '2183729' => 'max@ditto.live' }
   s.source           = { :git => 'https://github.com/2183729/CoreDataDitto.git', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+  s.social_media_url = 'https://twitter.com/dittolive'
 
   s.ios.deployment_target = '13.0'
 
   s.source_files = 'CoreDataDitto/Classes/**/*'
-  
+
   # s.resource_bundles = {
   #   'CoreDataDitto' => ['CoreDataDitto/Assets/*.png']
   # }
