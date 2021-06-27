@@ -1,8 +1,6 @@
 PODS:
   - CoreDataDitto (0.1.0):
-    - DeepDiff (~> 2.2.0)
     - DittoSwift (~> 1.0.4)
-  - DeepDiff (2.2.0)
   - DittoObjC (1.0.4)
   - DittoSwift (1.0.4):
     - DittoObjC (= 1.0.4)
@@ -14,7 +12,6 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - DeepDiff
     - DittoObjC
     - DittoSwift
     - Fakery
@@ -24,8 +21,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  CoreDataDitto: ca898062f2ea75515c85814fa9136c4925aa3b6e
-  DeepDiff: e329bc46dd14ca788d8ec08d34420799ba1d77f2
+  CoreDataDitto: a0d370d182a73234be65cc79ce3ba498a1a39111
   DittoObjC: 2b43a649452c955284365dbc714369cef18e4fca
   DittoSwift: 68612d60faf2816fda12ff01ed849ec88571f84b
   Fakery: a90caff00ca5cacde6c161c3eafc72314a03d34d

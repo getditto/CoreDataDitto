@@ -7,18 +7,6 @@
 
 import DittoSwift
 import CoreData
-import DeepDiff
-
-
-extension Dictionary: DiffAware where Key == String, Value == Any {
-    public typealias DiffId = AnyHashable
-    public var diffId: AnyHashable {
-        return self["_id"] as! AnyHashable
-    }
-    public static func compareContent(_ a: Dictionary<String, Any>, _ b: Dictionary<String, Any>) -> Bool {
-        return NSDictionary(dictionary: a).isEqual(NSDictionary(dictionary: b))
-    }
-}
 
 
 extension NSManagedObject {

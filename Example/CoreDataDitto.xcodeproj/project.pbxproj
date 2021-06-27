@@ -293,7 +293,6 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-CoreDataDitto_Example/Pods-CoreDataDitto_Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CoreDataDitto/CoreDataDitto.framework",
-				"${BUILT_PRODUCTS_DIR}/DeepDiff/DeepDiff.framework",
 				"${BUILT_PRODUCTS_DIR}/Fakery/Fakery.framework",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/DittoObjC/DittoObjC.framework/DittoObjC",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/DittoSwift/DittoSwift.framework/DittoSwift",
@@ -301,7 +300,6 @@
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CoreDataDitto.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DeepDiff.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Fakery.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DittoObjC.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DittoSwift.framework",

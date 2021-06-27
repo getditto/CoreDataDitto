@@ -39,7 +39,6 @@ TODO: Add long description of the pod here.
   # s.public_header_files = 'Pod/Classes/**/*.h'
   s.frameworks = 'CoreData'
   s.dependency 'DittoSwift', '~> 1.0.4'
-  s.dependency 'DeepDiff', '~> 2.2.0'
 
 
   # DittoSwift isn't available for all simulator types
