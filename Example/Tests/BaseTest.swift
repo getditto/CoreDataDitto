@@ -12,37 +12,44 @@ import DittoSwift
 import CoreDataDitto
 import Fakery
 
+let menuModel = TestHelper.createMom()
 
 class BaseTestCase: XCTestCase {
 
-    var ditto: Ditto!
+    var ditto1: Ditto!
     var ditto2: Ditto!
-    var coreDataDitto: CoreDataDitto<MenuItem>!
-    var coreDataDitto2: CoreDataDitto<MenuItem>!
-    var pendingCursor: DittoPendingCursorOperation!
-    var pendingCursor2: DittoPendingCursorOperation!
-    let appName = randomAppName()
+    var mom: NSManagedObjectModel!
+    var appName = randomAppName()
+    var coreData1: CoreDataContainer!
+    var coreData2: CoreDataContainer!
+    var managedContext1: NSManagedObjectContext!
+    var managedContext2: NSManagedObjectContext!
+    var fetchRequest: NSFetchRequest<MenuItem>!
+    
+    
 
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
         DittoLogger.minimumLogLevel = .debug
-        ditto = TestHelper.ditto(appName: appName)
+        ditto1 = TestHelper.ditto1(appName: appName)
         ditto2 = TestHelper.ditto2(appName: appName)
-        pendingCursor = ditto.store["menuItems"].findAll()
-        pendingCursor2 = ditto2.store["menuItems"].findAll()
-        let mom = TestHelper.createMom()
-        coreDataDitto = CoreDataDitto(ditto: ditto, collection: "menuItems", pendingCursorOperation: pendingCursor, fetchRequest: MenuItem.fetchRequest(), context: TestHelper.persistentContainer(mom: mom).viewContext, managedObjectIdKeyPath: "id")
-        coreDataDitto2 = CoreDataDitto(ditto: ditto2, collection: "menuItems", pendingCursorOperation: pendingCursor, fetchRequest: MenuItem.fetchRequest(), context: TestHelper.persistentContainer(mom: mom).viewContext, managedObjectIdKeyPath: "id")
+        coreData1 = TestHelper.persistentContainer(mom: menuModel)
+        coreData2 = TestHelper.persistentContainer(mom: menuModel)
+        coreData1.loadPersistentStores { description, err in
+            self.managedContext1 = self.coreData1.viewContext
+        }
+        coreData2.loadPersistentStores { description, err in
+            self.managedContext2 = self.coreData2.viewContext
+        }
 
-        ditto.startSync()
+        ditto1.startSync()
         ditto2.startSync()
     }
 
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
-        self.coreDataDitto?.stop()
-        ditto.stopSync()
+        ditto1.stopSync()
         ditto2.stopSync()
         removeDirectory(getTopLevelDittoDir())
         super.tearDown()

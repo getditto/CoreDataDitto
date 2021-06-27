@@ -17,8 +17,8 @@ class ViewController: UIViewController {
     let tableView = UITableView()
     var tasks = [Task]()
 
-    var coreDataDitto: CoreDataDitto<Task>!
-
+    var token: Token<Task, String?>?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "CoreDataDitto"
@@ -26,21 +26,14 @@ class ViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
 
-        let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
-        let ditto = AppDelegate.ditto
-        let pendingCursor = ditto!.store["tasks"].findAll()
-        coreDataDitto = CoreDataDitto(ditto: AppDelegate.ditto, collection: "tasks", pendingCursorOperation: pendingCursor, fetchRequest: fetchRequest, context: AppDelegate.persistentContainer.viewContext, managedObjectIdKeyPath: "id")
-
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addRandomBarButtonDidClick))
-
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(clearButtonDidClick))
 
-        try! coreDataDitto.startSync()
-        coreDataDitto.liveSnapshot = { [weak self] (snapshot) in
-            guard let `self` = self else { return }
-            self.tasks = snapshot.managedObjects
+        token = AppDelegate.persistentContainer.viewContext.bind(to: AppDelegate.ditto, primaryKeyPath: \Task.id, collectionName: "tasks") { items in
+            self.tasks = items
             self.tableView.reloadData()
         }
+
     }
 
     override func viewDidLayoutSubviews() {
@@ -54,7 +47,7 @@ class ViewController: UIViewController {
     }
 
     @objc func addRandomBarButtonDidClick() {
-        let task = Task(context: coreDataDitto.managedObjectContext)
+        let task = Task(context: AppDelegate.persistentContainer.viewContext)
         task.id = UUID().uuidString
         task.body = Faker().lorem.sentence()
         task.isDone = false
@@ -73,14 +66,14 @@ class ViewController: UIViewController {
 
         alertController.addAction(UIAlertAction(title: "Delete CoreData", style: .default, handler: { _ in
             self.tasks.forEach { task in
-                self.coreDataDitto.managedObjectContext.delete(task)
+                AppDelegate.persistentContainer.viewContext.delete(task)
             }
         }))
 
         alertController.addAction(UIAlertAction(title: "Delete Both", style: .destructive, handler: { _ in
             AppDelegate.ditto.store["tasks"].findAll().remove()
             self.tasks.forEach { task in
-                self.coreDataDitto.managedObjectContext.delete(task)
+                AppDelegate.persistentContainer.viewContext.delete(task)
             }
         }))
 
@@ -122,7 +115,7 @@ extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         guard editingStyle == .delete else { return }
         let task = tasks[indexPath.row]
-        coreDataDitto.managedObjectContext.delete(task)
+        AppDelegate.persistentContainer.viewContext.delete(task)
     }
 
 }
