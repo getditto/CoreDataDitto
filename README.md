@@ -64,7 +64,7 @@ This library does _not_ handle relationships and will attempt to sync the _entir
 
 ## Author
 
-2183729, max@ditto.live
+Ditto (contact@ditto.live)
 
 ## License
 
