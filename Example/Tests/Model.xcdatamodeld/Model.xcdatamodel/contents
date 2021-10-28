@@ -1,12 +1,69 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="18154" systemVersion="20F71" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="19206" systemVersion="20G165" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Category" representedClassName="Category" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="menuItems" optional="YES"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="relationship" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MenuItem" inverseName="category" inverseEntity="MenuItem"/>
+    </entity>
+    <entity name="Flight" representedClassName="Flight" syncable="YES" codeGenerationType="class">
+        <attribute name="arrivalTime" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="carrierCode" attributeType="String"/>
+        <attribute name="departureTime" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="flightNumber" attributeType="Integer 16" maxValueString="9999" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="seats" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Seat" inverseName="flight" inverseEntity="Seat"/>
+    </entity>
     <entity name="MenuItem" representedClassName="MenuItem" syncable="YES" codeGenerationType="class">
         <attribute name="details" optional="YES" attributeType="String"/>
         <attribute name="id" optional="YES" attributeType="String"/>
         <attribute name="name" attributeType="String"/>
         <attribute name="price" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="category" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Category" inverseName="relationship" inverseEntity="Category"/>
+        <relationship name="flight" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Flight"/>
+    </entity>
+    <entity name="Order" representedClassName="Order" syncable="YES" codeGenerationType="class">
+        <attribute name="createdOn" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="isCanceled" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="isFulfilled" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="isPending" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <relationship name="orderItems" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="OrderItem" inverseName="order" inverseEntity="OrderItem"/>
+        <relationship name="passenger" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Passenger" inverseName="orders" inverseEntity="Passenger"/>
+    </entity>
+    <entity name="OrderItem" representedClassName="OrderItem" syncable="YES" codeGenerationType="class">
+        <attribute name="notes" attributeType="String" defaultValueString=""/>
+        <attribute name="price" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="quantity" attributeType="Integer 16" minValueString="0" defaultValueString="1" usesScalarValueType="YES"/>
+        <relationship name="menuItem" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MenuItem"/>
+        <relationship name="order" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Order" inverseName="orderItems" inverseEntity="Order"/>
+    </entity>
+    <entity name="Passenger" representedClassName="Passenger" syncable="YES" codeGenerationType="class">
+        <attribute name="isCrew" attributeType="Boolean" usesScalarValueType="YES"/>
+        <relationship name="flight" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Flight"/>
+        <relationship name="orders" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Order" inverseName="passenger" inverseEntity="Order"/>
+        <relationship name="seat" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Seat"/>
+        <relationship name="user" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User"/>
+    </entity>
+    <entity name="Seat" representedClassName="Seat" syncable="YES" codeGenerationType="class">
+        <attribute name="letter" attributeType="String" minValueString="1" maxValueString="1" regularExpressionString="^{A-Z]"/>
+        <attribute name="number" attributeType="Integer 16" minValueString="0" maxValueString="100" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="flight" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Flight" inverseName="seats" inverseEntity="Flight"/>
+    </entity>
+    <entity name="User" representedClassName="User" syncable="YES" codeGenerationType="class">
+        <attribute name="firstName" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isPremiumMember" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="lastName" optional="YES" attributeType="String"/>
+        <attribute name="seatLetter" optional="YES" attributeType="String"/>
+        <attribute name="seatNumber" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
     </entity>
     <elements>
-        <element name="MenuItem" positionX="-54" positionY="-9" width="128" height="89"/>
+        <element name="Category" positionX="-54" positionY="18" width="128" height="89"/>
+        <element name="Flight" positionX="-27" positionY="81" width="128" height="104"/>
+        <element name="MenuItem" positionX="-54" positionY="-9" width="128" height="119"/>
+        <element name="Passenger" positionX="-9" positionY="90" width="128" height="104"/>
+        <element name="Seat" positionX="-36" positionY="72" width="128" height="74"/>
+        <element name="User" positionX="-45" positionY="45" width="128" height="119"/>
+        <element name="Order" positionX="9" positionY="117" width="128" height="119"/>
+        <element name="OrderItem" positionX="27" positionY="126" width="128" height="104"/>
     </elements>
 </model>
